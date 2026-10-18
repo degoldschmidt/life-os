@@ -3,7 +3,7 @@ import { Tile } from "@/components/ui/tile";
 import { Label, Rule } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { isSupabaseConfigured } from "@/lib/env";
-import { sendMagicLink } from "./actions";
+import { sendMagicLink, startOver, verifyCode } from "./actions";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -12,6 +12,9 @@ const ERRORS: Record<string, string> = {
   "not-configured": "Supabase isn't configured yet. See docs/SETUP.md.",
   "link-invalid": "That sign-in link is invalid or expired. Request a new one.",
   "rate-limit": "Too many sign-in emails for now. Wait about an hour, or set up custom SMTP in Supabase.",
+  "code-format": "Enter the 6-digit code from the email.",
+  "code-invalid": "That code is wrong or expired. Check the latest email or start over.",
+  "code-expired": "Your sign-in request expired. Enter your email again.",
   "send-failed": "Couldn't send the link. Check the email and try again.",
 };
 
@@ -45,7 +48,30 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
         <Label>Sign in</Label>
         <Rule dotted className="mt-3" />
         {sent ? (
-          <p className="mt-6 text-[16px]">Check your email for a sign-in link.</p>
+          <div className="mt-6 flex flex-col gap-4">
+            <p className="text-[16px]">Check your email. Tap the link, or enter the code from the email below.</p>
+            <form action={verifyCode} className="flex flex-col gap-4">
+              <input type="hidden" name="next" value={next} />
+              <label className="flex flex-col gap-2">
+                <span className="label text-muted">Code</span>
+                <input
+                  name="code"
+                  required
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  pattern="[0-9]{6,10}"
+                  placeholder="123456"
+                  className="rounded-[8px] border border-line-dark bg-transparent px-3 py-[10px] text-[20px] tracking-[0.3em] text-on-ink placeholder:text-on-ink-muted"
+                />
+              </label>
+              <Button type="submit" variant="fill" className="!border-on-ink !bg-on-ink !text-ink">
+                Sign in
+              </Button>
+            </form>
+            <form action={startOver}>
+              <button type="submit" className="label text-muted underline">Use a different email</button>
+            </form>
+          </div>
         ) : (
           <form action={sendMagicLink} className="mt-6 flex flex-col gap-4">
             <input type="hidden" name="next" value={next} />

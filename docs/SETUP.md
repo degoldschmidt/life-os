@@ -17,7 +17,19 @@ you can do (accounts, keys), then the commands to run.
 5. Authentication → URL configuration:
    - Site URL: your production URL (e.g. `https://life-os.vercel.app`)
    - Redirect URLs: `http://localhost:3000/auth/callback`, `https://<your-domain>/auth/callback`
-6. Authentication → Email templates → Magic link: make sure the link uses `{{ .ConfirmationURL }}`.
+6. Authentication → Emails → Templates. Edit **both** "Magic link" and "Confirm signup" and make the body contain the link and the code:
+
+   ```html
+   <h2>Sign in to Life OS</h2>
+   <p><a href="{{ .ConfirmationURL }}">Sign in with this link</a></p>
+   <p>Or enter this code in the app: <strong>{{ .Token }}</strong></p>
+   ```
+
+   The code matters on iPhone and iPad: a link opens Safari, not the installed Home Screen app,
+   so inside the installed app you sign in by typing the code instead.
+7. Free projects share a small built-in email allowance. For reliable delivery set up custom
+   SMTP (Authentication → Emails → SMTP Settings), for example Resend with the sender
+   `onboarding@resend.dev`, which can deliver to the email you registered with.
 
 ## 2. Local environment
 
