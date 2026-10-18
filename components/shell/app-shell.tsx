@@ -40,6 +40,10 @@ export function AppShell({ children, email, inboxCount = 0 }: { children: ReactN
           </Link>
           <CaptureButton />
           <SearchButton />
+          <Link href="/settings" className="mt-3 flex items-center justify-between text-[13px] text-muted hover:text-text">
+            <span>Settings</span>
+            <Mono className="text-muted">,</Mono>
+          </Link>
           <form action="/auth/signout" method="post" className="mt-6">
             <button type="submit" className="label text-muted hover:text-text" title={email}>
               Sign out

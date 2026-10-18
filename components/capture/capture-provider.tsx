@@ -17,6 +17,14 @@ const SCREENS = [
   { label: "Journal", href: "/journal", key: "5" },
   { label: "Review", href: "/review", key: "6" },
   { label: "Inbox", href: "/inbox", key: "I" },
+  { label: "Settings", href: "/settings", key: "," },
+];
+
+const EXTRA = [
+  { label: "Plan the day", href: "/plan" },
+  { label: "Daily shutdown", href: "/shutdown" },
+  { label: "Weekly review", href: "/review" },
+  { label: "Trends", href: "/review/trends" },
 ];
 
 function isTyping(el: EventTarget | null) {
@@ -119,6 +127,13 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
                 <Command.Item key={s.href} value={`go ${s.label}`} onSelect={() => { setPalette(false); router.push(s.href); }} className="flex cursor-pointer items-center justify-between rounded-[8px] px-3 py-[10px] text-[14px] data-[selected=true]:bg-ink-2">
                   <span>{s.label}</span>
                   <span className="mono text-on-ink-muted">{s.key}</span>
+                </Command.Item>
+              ))}
+            </Command.Group>
+            <Command.Group heading="Rituals" className="[&_[cmdk-group-heading]]:label [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-on-ink-muted">
+              {EXTRA.map((s) => (
+                <Command.Item key={s.href} value={`ritual ${s.label}`} onSelect={() => { setPalette(false); router.push(s.href); }} className="flex cursor-pointer items-center justify-between rounded-[8px] px-3 py-[10px] text-[14px] data-[selected=true]:bg-ink-2">
+                  <span>{s.label}</span>
                 </Command.Item>
               ))}
             </Command.Group>

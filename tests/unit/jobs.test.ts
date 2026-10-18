@@ -30,6 +30,6 @@ describe("jobs", () => {
     expect(String(r.detail?.db)).toContain("skipped");
   });
   it("exposes the expected job names", () => {
-    expect(Object.keys(JOBS).sort()).toEqual(["calendar-sync", "heartbeat", "reminders"]);
+    expect(Object.keys(JOBS).sort()).toEqual(["backup", "calendar-sync", "heartbeat", "reminders"]);
   });
 });

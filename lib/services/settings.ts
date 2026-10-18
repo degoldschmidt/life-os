@@ -32,3 +32,14 @@ export async function getSettings(): Promise<Settings> {
     return DEFAULTS;
   }
 }
+
+export type SettingsPatch = Partial<Pick<Settings, "tz" | "dayStartHour" | "shutdownTime" | "dailyCapacityMin" | "aiModel">>;
+
+/** Create or update the user's settings row. */
+export async function saveSettings(userId: string, patch: SettingsPatch): Promise<void> {
+  const clean = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined));
+  await db()
+    .insert(schema.settings)
+    .values({ userId, ...clean })
+    .onConflictDoUpdate({ target: schema.settings.userId, set: { ...clean, updatedAt: new Date() } });
+}

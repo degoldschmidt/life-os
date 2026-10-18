@@ -180,6 +180,12 @@ export default async function TodayPage() {
         </div>
       </Tile>
 
+      <nav aria-label="More" className="flex flex-wrap gap-x-5 gap-y-2 md:col-start-2 xl:col-start-2">
+        {[["Habits", "/habits"], ["Inbox", "/inbox"], ["Trends", "/review/trends"], ["Settings", "/settings"]].map(([name, href]) => (
+          <Link key={href} href={href} className="label text-muted hover:text-text">{name}</Link>
+        ))}
+      </nav>
+
       <div className="grid gap-[14px] sm:grid-cols-2 md:col-start-2 xl:col-start-2">
         <Tile>
           <Label>Planned</Label>

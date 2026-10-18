@@ -1,5 +1,8 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { createClient } from "@supabase/supabase-js";
+import { exportData } from "@/lib/services/export";
+import { ownerUserId } from "@/lib/services/owner";
 
 export type JobResult = { ok: boolean; detail?: Record<string, unknown> };
 export type Job = { name: string; description: string; run: () => Promise<JobResult> };
@@ -34,6 +37,32 @@ export const JOBS: Record<string, Job> = {
         detail.api = "skipped: Supabase not configured";
       }
       return { ok: true, detail };
+    },
+  },
+  backup: {
+    name: "backup",
+    description: "Nightly JSON backup to the private 'backups' storage bucket; keeps the newest 30.",
+    async run() {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (!url || !key) return { ok: true, detail: { skipped: "SUPABASE_SERVICE_ROLE_KEY not set" } };
+      const userId = await ownerUserId();
+      if (!userId) return { ok: false, detail: { error: "owner user not found" } };
+
+      const data = await exportData(userId);
+      const body = new Blob([JSON.stringify(data)], { type: "application/json" });
+      const name = `life-os-${new Date().toISOString().slice(0, 10)}.json`;
+
+      const supabase = createClient(url, key, { auth: { persistSession: false } });
+      const created = await supabase.storage.createBucket("backups", { public: false });
+      if (created.error && !/already exists/i.test(created.error.message)) throw new Error(created.error.message);
+      const up = await supabase.storage.from("backups").upload(name, body, { upsert: true, contentType: "application/json" });
+      if (up.error) throw new Error(up.error.message);
+
+      const list = await supabase.storage.from("backups").list("", { limit: 200, sortBy: { column: "name", order: "desc" } });
+      const old = (list.data ?? []).slice(30).map((f) => f.name);
+      if (old.length) await supabase.storage.from("backups").remove(old);
+      return { ok: true, detail: { file: name, bytes: body.size, pruned: old.length } };
     },
   },
   "calendar-sync": {
