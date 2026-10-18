@@ -9,7 +9,24 @@ export type Settings = {
   shutdownTime: string;
   dailyCapacityMin: number;
   aiModel: string;
+  planTime: string;
+  pushPlan: boolean;
+  pushShutdown: boolean;
+  pushWeekly: boolean;
 };
+
+type Row = typeof schema.settings.$inferSelect;
+const fromRow = (r: Row): Settings => ({
+  tz: r.tz,
+  dayStartHour: r.dayStartHour,
+  shutdownTime: r.shutdownTime,
+  dailyCapacityMin: r.dailyCapacityMin,
+  aiModel: r.aiModel,
+  planTime: r.planTime,
+  pushPlan: r.pushPlan,
+  pushShutdown: r.pushShutdown,
+  pushWeekly: r.pushWeekly,
+});
 
 const DEFAULTS: Settings = {
   tz: DEFAULT_TZ,
@@ -17,6 +34,10 @@ const DEFAULTS: Settings = {
   shutdownTime: "18:00",
   dailyCapacityMin: 360,
   aiModel: "claude-sonnet-5-5",
+  planTime: "08:30",
+  pushPlan: true,
+  pushShutdown: true,
+  pushWeekly: true,
 };
 
 /** Settings for the current user; defaults until the DB is configured or a row exists. */
@@ -25,15 +46,13 @@ export async function getSettings(): Promise<Settings> {
   if (!user || !process.env.DATABASE_URL) return DEFAULTS;
   try {
     const [row] = await db().select().from(schema.settings).where(eq(schema.settings.userId, user.id)).limit(1);
-    if (!row) return DEFAULTS;
-    const { tz, dayStartHour, shutdownTime, dailyCapacityMin, aiModel } = row;
-    return { tz, dayStartHour, shutdownTime, dailyCapacityMin, aiModel };
+    return row ? fromRow(row) : DEFAULTS;
   } catch {
     return DEFAULTS;
   }
 }
 
-export type SettingsPatch = Partial<Pick<Settings, "tz" | "dayStartHour" | "shutdownTime" | "dailyCapacityMin" | "aiModel">>;
+export type SettingsPatch = Partial<Settings>;
 
 /** Create or update the user's settings row. */
 export async function saveSettings(userId: string, patch: SettingsPatch): Promise<void> {
@@ -47,7 +66,17 @@ export async function saveSettings(userId: string, patch: SettingsPatch): Promis
 /** Settings for a specific user, for background jobs that have no session. */
 export async function getSettingsFor(userId: string): Promise<Settings> {
   const [row] = await db().select().from(schema.settings).where(eq(schema.settings.userId, userId)).limit(1);
-  if (!row) return DEFAULTS;
-  const { tz, dayStartHour, shutdownTime, dailyCapacityMin, aiModel } = row;
-  return { tz, dayStartHour, shutdownTime, dailyCapacityMin, aiModel };
+  return row ? fromRow(row) : DEFAULTS;
+}
+
+export type ReminderMark = { lastPlanPush: string | null; lastShutdownPush: string | null; lastReviewPush: string | null };
+
+export async function getReminderMarks(userId: string): Promise<ReminderMark> {
+  const [row] = await db().select().from(schema.settings).where(eq(schema.settings.userId, userId)).limit(1);
+  return { lastPlanPush: row?.lastPlanPush ?? null, lastShutdownPush: row?.lastShutdownPush ?? null, lastReviewPush: row?.lastReviewPush ?? null };
+}
+
+export async function markReminderSent(userId: string, kind: "plan" | "shutdown" | "weekly", key: string): Promise<void> {
+  const set = kind === "plan" ? { lastPlanPush: key } : kind === "shutdown" ? { lastShutdownPush: key } : { lastReviewPush: key };
+  await db().update(schema.settings).set(set).where(eq(schema.settings.userId, userId));
 }

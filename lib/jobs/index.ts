@@ -4,7 +4,12 @@ import { createClient } from "@supabase/supabase-js";
 import { exportData } from "@/lib/services/export";
 import { ownerUserId } from "@/lib/services/owner";
 import { connectionStatus, isGoogleConfigured, syncGoogleCalendar } from "@/lib/services/gcal";
-import { getSettingsFor } from "@/lib/services/settings";
+import { getReminderMarks, getSettingsFor, markReminderSent } from "@/lib/services/settings";
+import { pushConfigured, sendPushToUser } from "@/lib/push";
+import { dueReminders, MESSAGES } from "@/lib/reminders";
+import { logicalDayKey, periodFor } from "@/lib/dates";
+import { getMorningIntention } from "@/lib/services/journal";
+import { isReviewFinal } from "@/lib/services/reviews";
 
 export type JobResult = { ok: boolean; detail?: Record<string, unknown> };
 export type Job = { name: string; description: string; run: () => Promise<JobResult> };
@@ -82,9 +87,31 @@ export const JOBS: Record<string, Job> = {
   },
   reminders: {
     name: "reminders",
-    description: "Shutdown and planning reminders via Web Push (phase 2).",
+    description: "Plan, shutdown and weekly-review reminders via Web Push. Run every 5 minutes.",
     async run() {
-      return { ok: true, detail: { skipped: "arrives in phase 2" } };
+      if (!pushConfigured()) return { ok: true, detail: { skipped: "push is not configured" } };
+      const userId = await ownerUserId();
+      if (!userId) return { ok: false, detail: { error: "owner user not found" } };
+      const settings = await getSettingsFor(userId);
+      const now = new Date();
+      const day = logicalDayKey(now, settings.tz, settings.dayStartHour);
+      const week = periodFor("week", day, settings.tz).id;
+
+      const [marks, intention, shutdownDone, weeklyDone] = await Promise.all([
+        getReminderMarks(userId),
+        getMorningIntention(userId, day),
+        isReviewFinal(userId, "day", day),
+        isReviewFinal(userId, "week", week),
+      ]);
+      const due = dueReminders(now, settings, marks, { intentionSet: !!intention, shutdownDone, weeklyReviewDone: weeklyDone });
+      const sent: Record<string, unknown> = {};
+      for (const kind of due) {
+        const r = await sendPushToUser(userId, MESSAGES[kind]);
+        // Mark even if nobody is subscribed, so a missing device doesn't retry every five minutes.
+        await markReminderSent(userId, kind, kind === "weekly" ? week : day);
+        sent[kind] = r;
+      }
+      return { ok: true, detail: { due, sent } };
     },
   },
 };

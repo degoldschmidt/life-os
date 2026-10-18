@@ -21,6 +21,11 @@ const schema = z.object({
   shutdownTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
   capacityHours: z.coerce.number().min(1).max(16),
   aiModel: z.enum(["claude-sonnet-5-5", "claude-opus-5-5", "claude-fable-5-1"]),
+  planTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+  // Unchecked checkboxes are simply absent from the form.
+  pushPlan: z.string().optional(),
+  pushShutdown: z.string().optional(),
+  pushWeekly: z.string().optional(),
 });
 
 export async function updateSettings(formData: FormData) {
@@ -34,6 +39,10 @@ export async function updateSettings(formData: FormData) {
     shutdownTime: p.shutdownTime,
     dailyCapacityMin: Math.round(p.capacityHours * 60),
     aiModel: p.aiModel,
+    planTime: p.planTime,
+    pushPlan: p.pushPlan === "on",
+    pushShutdown: p.pushShutdown === "on",
+    pushWeekly: p.pushWeekly === "on",
   });
   revalidatePath("/", "layout");
   redirect("/settings?saved=1");

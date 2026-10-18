@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth";
 import { getSettings } from "@/lib/services/settings";
 import { updateSettings } from "@/app/actions/settings";
+import { PushToggle } from "@/components/settings/push-toggle";
 import { disconnect, syncNow } from "@/app/actions/google";
 import { connectionStatus, isGoogleConfigured } from "@/lib/services/gcal";
 import { formatDistanceToNow } from "date-fns";
@@ -54,6 +55,19 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
             <span className="label text-muted">Shutdown time</span>
             <input name="shutdownTime" type="time" defaultValue={settings.shutdownTime} className={input} />
           </label>
+          <label className="flex flex-col gap-1">
+            <span className="label text-muted">Plan reminder at</span>
+            <input name="planTime" type="time" defaultValue={settings.planTime} className={input} />
+          </label>
+          <fieldset className="flex flex-col gap-2 sm:col-span-2">
+            <legend className="label mb-1 text-muted">Remind me to</legend>
+            {([["pushPlan", "Plan the day", settings.pushPlan], ["pushShutdown", "Shut down the day", settings.pushShutdown], ["pushWeekly", "Do the weekly review (Fridays)", settings.pushWeekly]] as const).map(([name, label, on]) => (
+              <label key={name} className="flex items-center gap-3 text-[14px]">
+                <input type="checkbox" name={name} defaultChecked={on} className="h-4 w-4 accent-[var(--text)]" />
+                {label}
+              </label>
+            ))}
+          </fieldset>
           <label className="flex flex-col gap-1">
             <span className="label text-muted">Planned hours a day</span>
             <input name="capacityHours" type="number" step="0.5" min={1} max={16} defaultValue={settings.dailyCapacityMin / 60} className={input} />
@@ -115,7 +129,18 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
           <Status ok={env("ANTHROPIC_API_KEY")} label="Claude assistant" hint="Review drafts, top-3 proposals, brain dump" />
           <Status ok={env("NOTION_TOKEN")} label="Notion import" hint="Import pages and databases on the Import screen" />
           <Status ok={env("MCP_TOKEN")} label="Claude Code (MCP)" hint="Lets Claude Code read and write your Life OS" />
-          <Status ok={env("VAPID_PUBLIC_KEY") && env("VAPID_PRIVATE_KEY")} label="Push reminders" />
+          <Status ok={env("NEXT_PUBLIC_VAPID_PUBLIC_KEY") && env("VAPID_PRIVATE_KEY")} label="Push reminders" hint="Server keys. Turn on per device below." />
+        </Tile>
+
+        <Tile>
+          <Label>Notifications on this device</Label>
+          <Rule dotted />
+          {process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ? (
+            <PushToggle publicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY} />
+          ) : (
+            <p className="text-[13px] text-muted">Add NEXT_PUBLIC_VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY in Vercel, then redeploy.</p>
+          )}
+          <p className="mt-3 text-[12px] text-muted">Reminders are sent by the scheduler: add a cron-job.org job for /api/cron/reminders every 5 minutes.</p>
         </Tile>
 
         <Tile dark>

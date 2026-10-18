@@ -335,6 +335,14 @@ export const settings = pgTable("settings", {
   shutdownTime: text("shutdown_time").notNull().default("18:00"),
   dailyCapacityMin: integer("daily_capacity_min").notNull().default(360),
   aiModel: text("ai_model").notNull().default("claude-sonnet-5-5"),
+  planTime: text("plan_time").notNull().default("08:30"),
+  pushPlan: boolean("push_plan").notNull().default(true),
+  pushShutdown: boolean("push_shutdown").notNull().default(true),
+  pushWeekly: boolean("push_weekly").notNull().default(true),
+  // What was last pushed, so each reminder fires at most once per day or week.
+  lastPlanPush: date("last_plan_push"),
+  lastShutdownPush: date("last_shutdown_push"),
+  lastReviewPush: text("last_review_push"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

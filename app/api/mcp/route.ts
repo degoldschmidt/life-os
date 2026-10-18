@@ -17,8 +17,7 @@ async function handle(request: Request): Promise<Response> {
   if (!bearerMatches(request.headers.get("authorization"), process.env.MCP_TOKEN)) {
     return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { "Content-Type": "application/json", "WWW-Authenticate": "Bearer" } });
   }
-  // MCP_OWNER_USER_ID exists so the endpoint can be tested against a scratch user; production uses the allow-listed email.
-  const userId = process.env.MCP_OWNER_USER_ID ?? (await ownerUserId());
+  const userId = await ownerUserId();
   if (!userId) return json(500, { error: "owner user not found" });
 
   const server = buildMcpServer(await mcpContext(userId));

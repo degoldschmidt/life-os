@@ -255,3 +255,13 @@ export async function listReviews(userId: string, types: ReviewType[], limit = 6
     .orderBy(desc(reviews.periodStart))
     .limit(limit);
 }
+
+/** Has this review been finished? Used to avoid reminding about finished work. */
+export async function isReviewFinal(userId: string, type: ReviewType, periodId: string): Promise<boolean> {
+  const [r] = await db()
+    .select({ status: reviews.status })
+    .from(reviews)
+    .where(and(eq(reviews.userId, userId), eq(reviews.type, type), eq(reviews.periodId, periodId)))
+    .limit(1);
+  return r?.status === "final";
+}

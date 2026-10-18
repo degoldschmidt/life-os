@@ -8,6 +8,13 @@
       "when": 1792322102498,
       "tag": "0000_woozy_thaddeus_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792338398953,
+      "tag": "0001_purple_warpath",
+      "breakpoints": true
     }
   ]
 }
