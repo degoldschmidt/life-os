@@ -15,6 +15,45 @@
   --line-dark: #2e2e2e;
   --orange: #d8622a;
   --radius-tile: 14px;
+  /* Hairline around instrument tiles: invisible on paper, needed against a dark canvas. */
+  --ring-ink: transparent;
+  color-scheme: light;
+}
+
+/* Dark: the paper darkens, content tiles sit one step above it, instrument tiles go near-black. */
+:root[data-theme="dark"] {
+  --paper: #131313;
+  --tile: #1c1c1c;
+  --tile-2: #262626;
+  --ink: #070707;
+  --ink-2: #181818;
+  --text: #ece9e3;
+  --muted: #8f8c86;
+  --line: #2e2e2e;
+  --on-ink: #e9e7e1;
+  --on-ink-muted: #8b8984;
+  --line-dark: #2a2a2a;
+  --orange: #e8703a;
+  --ring-ink: #2a2a2a;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #131313;
+    --tile: #1c1c1c;
+    --tile-2: #262626;
+    --ink: #070707;
+    --ink-2: #181818;
+    --text: #ece9e3;
+    --muted: #8f8c86;
+    --line: #2e2e2e;
+    --on-ink: #e9e7e1;
+    --on-ink-muted: #8b8984;
+    --line-dark: #2a2a2a;
+    --orange: #e8703a;
+    --ring-ink: #2a2a2a;
+    color-scheme: dark;
+  }
 }
 
 @theme inline {

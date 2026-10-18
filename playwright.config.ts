@@ -22,6 +22,7 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publishable_ci_dummy",
       AUTH_ALLOWED_EMAIL: process.env.AUTH_ALLOWED_EMAIL ?? "ci@example.com",
       CRON_SECRET: "e2e-cron-secret",
+      MCP_TOKEN: "e2e-mcp-token-for-tests-only-1234",
     },
   },
 });

@@ -16,7 +16,7 @@ const darkVars = {
 export function Tile({ dark, as: Tag = "div", className = "", style, children, ...rest }: Props) {
   return (
     <Tag
-      className={`rounded-tile p-5 md:p-[22px] ${dark ? "bg-ink text-on-ink" : "bg-tile text-text"} ${className}`}
+      className={`rounded-tile p-5 md:p-[22px] ${dark ? "bg-ink text-on-ink ring-1 ring-inset ring-[var(--ring-ink)]" : "bg-tile text-text"} ${className}`}
       style={dark ? { ...darkVars, ...style } : style}
       {...rest}
     >

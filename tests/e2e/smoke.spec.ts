@@ -44,3 +44,22 @@ test("a code without a pending email asks to start over", async ({ page }) => {
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByText("sign-in request expired")).toBeVisible();
 });
+
+test("MCP endpoint refuses requests without the bearer token", async ({ request }) => {
+  const none = await request.post("/api/mcp", { data: {} });
+  expect(none.status()).toBe(401);
+  const wrong = await request.post("/api/mcp", { data: {}, headers: { authorization: "Bearer not-the-token-not-the-token" } });
+  expect(wrong.status()).toBe(401);
+});
+
+test("export and settings require sign-in", async ({ page, request }) => {
+  const res = await request.get("/api/export/json", { maxRedirects: 0 });
+  expect([301, 302, 303, 307, 308]).toContain(res.status());
+  await page.goto("/settings");
+  await expect(page).toHaveURL(/\/login/);
+});
+
+test("unknown addresses send signed-out visitors to sign-in instead of revealing what exists", async ({ page }) => {
+  await page.goto("/definitely-not-a-page");
+  await expect(page).toHaveURL(/\/login/);
+});

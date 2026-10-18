@@ -32,7 +32,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#eceae4",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#eceae4" },
+    { media: "(prefers-color-scheme: dark)", color: "#131313" },
+  ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -40,7 +43,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrains.variable} h-full`}>
+    <html lang="en" className={`${inter.variable} ${jetbrains.variable} h-full`} suppressHydrationWarning>
+      <head>
+        {/* Apply the saved theme before first paint so there is no flash. */}
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem("lifeos-theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}` }} />
+      </head>
       <body className="min-h-full flex flex-col bg-paper text-text">
         {children}
         <RegisterServiceWorker />

@@ -38,6 +38,7 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [capture, setCapture] = useState(false);
   const [palette, setPalette] = useState(false);
+  const [help, setHelp] = useState(false);
   const [text, setText] = useState("");
   const [toast, setToast] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +57,7 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
       }
       if (e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return;
       if (e.key === "c") { e.preventDefault(); openCapture(); return; }
+      if (e.key === "?") { e.preventDefault(); setHelp((h) => !h); return; }
       const hit = SCREENS.find((s) => s.key.toLowerCase() === e.key.toLowerCase());
       if (hit) router.push(hit.href);
     }
@@ -147,6 +149,20 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
           </Command.List>
         </div>
       </Command.Dialog>
+
+      {help ? (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-ink/40 p-3 pt-[14vh]" onMouseDown={(e) => { if (e.target === e.currentTarget) setHelp(false); }} onKeyDown={(e) => { if (e.key === "Escape") setHelp(false); }}>
+          <div role="dialog" aria-label="Keyboard shortcuts" className="w-full max-w-[460px] rounded-tile bg-ink p-5 text-on-ink ring-1 ring-inset ring-[var(--ring-ink)]">
+            <div className="flex items-center justify-between"><span className="label text-on-ink-muted">Shortcuts</span><button type="button" onClick={() => setHelp(false)} className="label text-on-ink-muted hover:text-on-ink">Close</button></div>
+            <dl className="mt-4 grid grid-cols-[90px_1fr] gap-y-3 text-[14px]">
+              {[["C", "Capture a task"], ["⌘K", "Search and jump anywhere"], ["1 – 6", "Today, Week, Goals, Habits, Journal, Review"], ["I", "Inbox"], [",", "Settings"], ["?", "This list"], ["Esc", "Close any panel"]].map(([k, v]) => (
+                <div key={k} className="contents"><dt className="mono text-on-ink-muted">{k}</dt><dd>{v}</dd></div>
+              ))}
+            </dl>
+            <p className="mono mt-4 text-on-ink-muted">IN A TASK ROW: TAP THE TITLE FOR ITS ACTIONS</p>
+          </div>
+        </div>
+      ) : null}
 
       {toast ? (
         <div role="status" className="mono fixed bottom-[96px] left-1/2 z-50 max-w-[90vw] -translate-x-1/2 truncate rounded-full bg-ink px-4 py-[10px] text-on-ink md:bottom-8">

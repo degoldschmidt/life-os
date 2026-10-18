@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { getSettings } from "@/lib/services/settings";
 import { updateSettings } from "@/app/actions/settings";
 import { PushToggle } from "@/components/settings/push-toggle";
+import { ThemeToggle } from "@/components/settings/theme-toggle";
 import { disconnect, syncNow } from "@/app/actions/google";
 import { connectionStatus, isGoogleConfigured } from "@/lib/services/gcal";
 import { formatDistanceToNow } from "date-fns";
@@ -92,6 +93,13 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
       </Tile>
 
       <div className="flex flex-col gap-[14px]">
+        <Tile>
+          <Label>Appearance</Label>
+          <Rule dotted />
+          <ThemeToggle />
+          <p className="mt-3 text-[12px] text-muted">Saved per device. System follows your phone or Mac.</p>
+        </Tile>
+
         <Tile>
           <Label>Your data</Label>
           <Rule dotted />

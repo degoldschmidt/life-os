@@ -16,6 +16,7 @@ const AREAS = [
 export function AppShell({ children, email, inboxCount = 0 }: { children: ReactNode; email: string; inboxCount?: number }) {
   return (
     <CaptureProvider>
+    <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-on-ink">Skip to content</a>
     <AutoRefresh />
     <div className="mx-auto flex w-full max-w-[1400px] flex-1 md:grid md:grid-cols-[200px_minmax(0,1fr)]">
       <aside className="hidden border-r border-line px-3 py-5 md:flex md:flex-col">
@@ -51,7 +52,7 @@ export function AppShell({ children, email, inboxCount = 0 }: { children: ReactN
           </form>
         </div>
       </aside>
-      <main className="flex-1 px-4 pb-28 pt-5 md:px-6 md:pb-10 md:pt-6">{children}</main>
+      <main id="main" className="flex-1 px-4 pb-28 pt-5 md:px-6 md:pb-10 md:pt-6">{children}</main>
       <PhoneTabs />
       <CaptureButton fab />
     </div>
