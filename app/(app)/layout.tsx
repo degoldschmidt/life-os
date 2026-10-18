@@ -6,7 +6,7 @@ import { countInbox } from "@/lib/services/tasks";
 // Every screen depends on the session cookie; never prerender.
 export const dynamic = "force-dynamic";
 
-export default async function AppLayout({ children }: LayoutProps<"/">) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   let inboxCount = 0;
