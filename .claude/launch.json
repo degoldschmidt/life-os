@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "life-os-dev-preview",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["DEV_PREVIEW_USER=1", "pnpm", "exec", "next", "dev", "-p", "3000"],
+      "port": 3000
+    }
+  ]
+}

@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Life OS renders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#ECEAE4;--tile:#E3E1DB;--tile2:#DAD8D1;--ink:#161616;--ink-tile:#141414;--ink-tile2:#1E1E1E;
+  --text:#171717;--muted:#6E6C67;--line:#C9C7C0;
+  --t-light:#E9E7E1;--t-muted:#8B8984;--t-line:#2E2E2E;
+  --orange:#D8622A;
+  --sans:"Neue Haas Grotesk Display","Helvetica Neue",Inter,Helvetica,Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased}
+.page{max-width:1160px;margin:0 auto;padding:36px 28px 90px}
+.plus{font-size:22px;font-weight:200;color:var(--muted);line-height:1}
+.hero{display:grid;grid-template-columns:minmax(0,1.6fr) 300px 300px;gap:16px;align-items:stretch;margin-top:14px}
+.title{font-size:104px;line-height:.86;letter-spacing:-.035em;font-weight:400;margin:0}
+.sub{display:flex;align-items:center;gap:10px;margin-top:26px;font-size:17px}
+.od{width:10px;height:10px;border-radius:50%;background:var(--orange);display:inline-block;flex:none}
+.bd{width:8px;height:8px;border-radius:50%;background:var(--ink);display:inline-block}
+.hd{width:8px;height:8px;border-radius:50%;border:1.2px solid var(--ink);display:inline-block}
+.tile{background:var(--tile);border-radius:var(--r);padding:22px 22px}
+.dark{background:var(--ink-tile);color:var(--t-light)}
+.dark .mu{color:var(--t-muted)}
+.dark .rule{border-color:var(--t-line)}
+.mono{font-family:var(--mono);font-size:11.5px;letter-spacing:.02em}
+.cap{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.mu{color:var(--muted)}
+.rule{border-top:1px solid var(--line);margin:12px 0}
+.dots{border-top:1px dotted var(--line);margin:10px 0}
+.dark .dots{border-color:#3A3A3A}
+.thin{font-weight:200;letter-spacing:-.03em;line-height:.95}
+.idx{display:grid;grid-template-columns:28px 1fr;row-gap:9px;font-family:var(--mono);font-size:12px}
+.idx .n{color:var(--t-muted)}
+h2{font-size:15px;font-weight:400;margin:56px 0 10px;display:flex;align-items:center;gap:12px}
+h2 .cap{color:var(--muted)}
+.note{font-size:13px;color:var(--muted);margin:0 0 18px;max-width:640px}
+.grid{display:grid;gap:14px}
+.row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px dotted var(--line);font-size:14px}
+.row:last-child{border-bottom:0}
+.row .n{font-family:var(--mono);font-size:11.5px;color:var(--muted);width:20px}
+.row .code{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto;letter-spacing:.06em}
+.row .t{font-family:var(--mono);font-size:11px;color:var(--muted);width:40px;text-align:right}
+.box{width:14px;height:14px;border:1.2px solid var(--ink);border-radius:3px;flex:none;display:inline-flex;align-items:center;justify-content:center}
+.box.d{background:var(--ink)}
+.box.d::after{content:"";width:7px;height:4px;border-left:1.3px solid var(--tile);border-bottom:1.3px solid var(--tile);transform:translateY(-1px) rotate(-45deg)}
+.done{color:var(--muted);text-decoration:line-through}
+.cal{position:relative;height:420px;margin-top:10px}
+.hr{position:absolute;left:0;right:0;border-top:1px solid var(--line);font-family:var(--mono);font-size:10px;color:var(--muted);padding-top:3px}
+.blk{position:absolute;left:38px;right:0;border-radius:8px;padding:7px 10px;font-size:12px;line-height:1.3}
+.blk .cap{display:block;margin-top:2px;opacity:.75}
+.ev{background:var(--ink-tile);color:var(--t-light)}
+.tb{border:1.2px solid var(--ink);color:var(--ink)}
+.ghost{border:1px dashed var(--muted);color:var(--muted);display:flex;align-items:center;justify-content:center}
+.now{position:absolute;left:0;right:0;border-top:1.2px solid var(--orange)}
+.now::before{content:"";position:absolute;left:-1px;top:-4px;width:7px;height:7px;border-radius:50%;background:var(--orange)}
+.kv{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:12px 0;border-bottom:1px solid var(--t-line)}
+.kv:last-child{border:0}
+.kv .on{color:var(--orange)}
+.dgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:9px;width:max-content}
+.dgrid i{width:7px;height:7px;border-radius:50%;background:var(--ink);display:block}
+.dgrid i.e{background:transparent;border:1px solid var(--ink)}
+.dgrid i.o{background:var(--orange)}
+.dark .dgrid i{background:var(--t-light)}
+.dark .dgrid i.e{background:transparent;border-color:#555}
+.dark .dgrid i.o{background:var(--orange)}
+.bar{display:grid;grid-template-columns:40px minmax(0,1fr) 44px;align-items:center;gap:14px;margin:12px 0}
+.bar .code{font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+.tr{position:relative;height:6px;background:var(--tile2);border-radius:3px}
+.tr span{position:absolute;left:0;top:0;height:100%;border-radius:3px;background:var(--ink)}
+.tr span.o{background:var(--orange)}
+.tr i{position:absolute;top:-5px;width:1.2px;height:16px;background:var(--ink)}
+.bar .v{font-family:var(--mono);font-size:11.5px;text-align:right}
+.cols{display:flex;align-items:flex-end;gap:8px;height:90px;margin-top:18px}
+.cols i{flex:1;background:#4A4A4A;border-radius:2px}
+.cols i.o{background:var(--orange)}
+.cols i.l{background:var(--t-light)}
+.days{display:flex;gap:8px;margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--t-muted)}
+.days span{flex:1;text-align:center}
+.step{display:grid;grid-template-columns:28px 1fr 16px;align-items:center;font-family:var(--mono);font-size:12px;padding:8px 0}
+.step .n{color:var(--t-muted)}
+.step.on .n,.step.on{color:var(--orange)}
+.step .m{justify-self:end}
+.strip{background:var(--ink-tile);color:var(--t-light);border-radius:var(--r);padding:20px 24px;display:flex;align-items:center;gap:22px;font-family:var(--mono);font-size:11.5px}
+.strip .o{color:var(--orange);letter-spacing:.08em}
+.loop{width:30px;height:30px;border-radius:50%;border:1.2px dashed var(--t-muted);flex:none}
+.ph{width:300px;height:620px;border-radius:44px;background:var(--ink-tile);padding:14px;display:flex;flex-direction:column;position:relative}
+.scr{flex:1;border-radius:32px;padding:22px 18px 16px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.scr.light{background:var(--tile);color:var(--text)}
+.scr.darkscr{background:var(--ink-tile2);color:var(--t-light)}
+.notch{width:96px;height:24px;border-radius:12px;background:var(--ink-tile);margin:0 auto 14px}
+.darkscr .notch{background:#0D0D0D}
+.tabs{margin-top:auto;display:flex;padding-top:14px;border-top:1px solid var(--line);font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase}
+.darkscr .tabs{border-color:var(--t-line)}
+.tabs span{flex:1;text-align:center;color:var(--muted)}
+.darkscr .tabs span{color:var(--t-muted)}
+.tabs span.on{color:var(--text)}
+.darkscr .tabs span.on{color:var(--t-light)}
+.tabs span::before{content:"";display:block;width:6px;height:6px;border-radius:50%;border:1px solid currentColor;margin:0 auto 6px}
+.tabs span.on::before{background:var(--orange);border-color:var(--orange)}
+.fab{position:absolute;right:18px;bottom:78px;width:52px;height:52px;border-radius:50%;background:var(--ink);color:var(--t-light);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:200}
+.chip{flex:1;text-align:center;padding:9px 0;border:1px solid var(--t-line);border-radius:8px;font-family:var(--mono);font-size:12px;color:var(--t-muted)}
+.chip.on{background:var(--t-light);color:var(--ink);border-color:var(--t-light)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.2px solid var(--ink);border-radius:999px;padding:9px 18px;font-size:13px;font-family:var(--mono);letter-spacing:.04em;text-transform:uppercase}
+.btn.fill{background:var(--ink);color:var(--t-light)}
+.dark .btn{border-color:var(--t-light);color:var(--t-light)}
+.dark .btn.fill{background:var(--t-light);color:var(--ink)}
+.sw{display:flex;gap:10px;align-items:center}
+.sw i{width:38px;height:38px;border-radius:9px;border:1px solid var(--line)}
+.icons{display:grid;grid-template-columns:repeat(7,1fr);gap:22px;justify-items:center;align-items:center;margin-top:8px}
+.icons i{width:22px;height:22px;display:block;border:1.2px solid var(--t-light);border-radius:50%}
+.icons i.sq{border-radius:4px}
+.icons i.o{background:var(--orange);border-color:var(--orange)}
+.icons i.ln{border:0;border-top:1.2px solid var(--t-light);height:0;width:22px}
+.icons i.dd{border:0;background:radial-gradient(circle,var(--t-light) 1.2px,transparent 1.4px) 0 0/7px 7px}
+.ln{position:absolute;border-left:1px dotted var(--line)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="plus">+</div>
+
+  <div class="hero">
+    <div style="padding:34px 0 0">
+      <h1 class="title">LIFE<br>OS</h1>
+      <div class="sub"><span class="od"></span>Plan. Review. Repeat.</div>
+      <p class="note" style="margin-top:56px">Renders in the Braun / Dieter Rams idiom: paper background, instrument-black tiles, one orange, monospace labels, thin numerals. Four screens below, Mac first, iPhone last. Life areas carry a three-letter code instead of a colour.</p>
+    </div>
+    <div class="tile" style="display:flex;flex-direction:column">
+      <div class="cap mu">Ref.</div>
+      <div class="mono">2026-10-18 · W42</div>
+      <div class="rule"></div>
+      <div style="display:flex;justify-content:center;margin:26px 0 18px"><svg width="110" height="96" viewBox="0 0 110 96" fill="none" stroke="#161616" stroke-width="1.4"><circle cx="55" cy="36" r="30"/><circle cx="34" cy="84" r="6" fill="#161616"/><circle cx="76" cy="84" r="6" fill="#161616"/></svg></div>
+      <div style="margin-top:auto;font-size:12.5px;display:grid;row-gap:8px">
+        <span style="display:flex;gap:10px;align-items:center"><i class="hd"></i>Plan</span>
+        <span style="display:flex;gap:10px;align-items:center"><i class="bd"></i>Do</span>
+        <span style="display:flex;gap:10px;align-items:center"><i class="bd"></i>Review</span>
+      </div>
+    </div>
+    <div class="tile dark" style="display:flex;flex-direction:column">
+      <div style="display:flex;justify-content:space-between;align-items:center"><span class="cap mu">Index</span><span class="od" style="width:7px;height:7px"></span></div>
+      <div class="dots" style="margin-top:14px"></div>
+      <div class="thin" style="font-size:64px;color:#7A7A7A;margin:14px 0 22px">06</div>
+      <div class="idx">
+        <span class="n">01</span><span>Today</span>
+        <span class="n">02</span><span>Week</span>
+        <span class="n">03</span><span>Goals</span>
+        <span class="n">04</span><span>Habits</span>
+        <span class="n">05</span><span>Journal</span>
+        <span class="n">06</span><span>Review</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>01 <span class="cap">— Today · MacBook</span></h2>
+  <p class="note">Home screen. Date and intention in the instrument tile, Top 3 and the rest in the middle, the Google Calendar day to the right. Second row: habits as a dot grid, planned hours in thin numerals, and the shutdown control panel.</p>
+  <div class="grid" style="grid-template-columns:260px minmax(0,1fr) 300px">
+    <div class="tile dark" style="display:flex;flex-direction:column">
+      <div style="display:flex;justify-content:space-between"><span class="cap mu">Sat · W42</span><span class="od" style="width:7px;height:7px"></span></div>
+      <div class="thin" style="font-size:112px;margin:22px 0 0">18</div>
+      <div class="cap" style="margin-top:4px">October 2026</div>
+      <div class="dots" style="margin:22px 0 16px"></div>
+      <div class="cap mu">Intention</div>
+      <div style="font-size:16px;line-height:1.35;margin-top:8px">Finish the figure 2 draft before anything else.</div>
+      <div style="margin-top:auto;display:flex;justify-content:space-between" class="mono mu"><span>07:40 UP</span><span>SHUTDOWN 18:00</span></div>
+    </div>
+    <div class="tile">
+      <div style="display:flex;justify-content:space-between"><span class="cap mu">Top 3</span><span class="cap mu">Est.</span></div>
+      <div class="dots"></div>
+      <div class="row"><span class="n">01</span><span class="box d"></span><span class="done">Reply to reviewer 2 comments</span><span class="code">WRK</span><span class="t">0:45</span></div>
+      <div class="row"><span class="n">02</span><span class="box"></span><span>Draft figure 2 for connectivity paper</span><span class="code">WRK</span><span class="t">2:00</span></div>
+      <div class="row"><span class="n">03</span><span class="box"></span><span>File Q3 expense report</span><span class="code">FIN</span><span class="t">0:30</span></div>
+      <div class="cap mu" style="margin-top:26px">Later</div>
+      <div class="dots"></div>
+      <div class="row"><span class="n">04</span><span class="box"></span><span>Call Mum</span><span class="code">REL</span><span class="t">0:20</span></div>
+      <div class="row"><span class="n">05</span><span class="box"></span><span>Zone 2 run</span><span class="code">HLT</span><span class="t">0:50</span></div>
+      <div class="row"><span class="n">06</span><span class="box"></span><span>Read Scheffer et al. preprint</span><span class="code">WRK</span><span class="t">0:30</span></div>
+      <div style="display:flex;gap:10px;margin-top:28px"><span class="btn">+ Capture</span><span class="btn" style="border-color:var(--line);color:var(--muted)">⌘K Search</span></div>
+    </div>
+    <div class="tile">
+      <div style="display:flex;justify-content:space-between"><span class="cap mu">Calendar</span><span class="cap mu">Google · 2 min</span></div>
+      <div class="cal">
+        <div class="hr" style="top:0">09</div>
+        <div class="hr" style="top:70px">10</div>
+        <div class="hr" style="top:140px">11</div>
+        <div class="hr" style="top:210px">12</div>
+        <div class="hr" style="top:280px">14</div>
+        <div class="hr" style="top:350px">15</div>
+        <div class="blk ev" style="top:6px;height:58px">Lab meeting<span class="cap">09:00 – 10:00</span></div>
+        <div class="blk tb" style="top:76px;height:128px">Deep work · Figure 2<span class="cap">10:05 – 12:00 · WRK</span></div>
+        <div class="now" style="top:118px"></div>
+        <div class="blk tb" style="top:214px;height:34px">Expense report<span class="cap" style="display:none"></span></div>
+        <div class="blk tb" style="top:286px;height:58px">Zone 2 run<span class="cap">14:00 – 14:50 · HLT</span></div>
+        <div class="blk ghost" style="top:356px;height:52px"><span class="cap">Drop a task here</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns:260px minmax(0,1fr) minmax(0,1fr) 300px;margin-top:14px">
+    <div class="tile">
+      <div style="display:flex;justify-content:space-between"><span class="cap mu">Habits</span><span class="mono mu">3</span></div>
+      <div class="rule"></div>
+      <div style="display:grid;row-gap:14px;margin-top:16px;font-size:13.5px">
+        <span style="display:flex;align-items:center;gap:12px"><i class="bd"></i>Stretch<span class="mono mu" style="margin-left:auto">HLT</span></span>
+        <span style="display:flex;align-items:center;gap:12px"><i class="hd"></i>Read 20 min<span class="mono mu" style="margin-left:auto">WRK</span></span>
+        <span style="display:flex;align-items:center;gap:12px"><i class="hd"></i>Message a friend<span class="mono mu" style="margin-left:auto">REL</span></span>
+      </div>
+      <div class="cap mu" style="margin-top:26px">Last 14 days</div>
+      <div class="dgrid" style="margin-top:12px"><i></i><i></i><i></i><i class="e"></i><i></i><i></i><i></i><i></i><i class="e"></i><i></i><i></i><i></i><i></i><i class="o"></i></div>
+    </div>
+    <div class="tile">
+      <div class="cap mu">Planned</div>
+      <div class="thin" style="font-size:84px;margin-top:22px">4:25</div>
+      <div class="rule"></div>
+      <div class="mono" style="display:flex;justify-content:space-between"><span class="mu">ENDS</span><span>17:40</span></div>
+      <div class="mono" style="display:flex;justify-content:space-between;margin-top:8px"><span class="mu">CAPACITY</span><span>6:00</span></div>
+    </div>
+    <div class="tile">
+      <div class="cap mu">Done</div>
+      <div class="thin" style="font-size:84px;margin-top:22px">1<span style="color:var(--muted)">/6</span></div>
+      <div class="rule"></div>
+      <div class="mono" style="display:flex;justify-content:space-between"><span class="mu">DEEP WORK</span><span>0:00</span></div>
+      <div class="mono" style="display:flex;justify-content:space-between;margin-top:8px"><span class="mu">YESTERDAY</span><span>5/7</span></div>
+    </div>
+    <div class="tile dark" style="display:flex;flex-direction:column">
+      <div style="display:flex;align-items:baseline;gap:10px"><span class="thin" style="font-size:52px">18:00</span><span class="cap mu">shutdown</span></div>
+      <div style="margin-top:14px">
+        <div class="kv"><span class="mu">Focus mode</span><span class="on">On</span></div>
+        <div class="kv"><span class="mu">Notifications</span><span>Paused</span></div>
+        <div class="kv"><span class="mu">Shutdown</span><span>in 2:20</span></div>
+      </div>
+      <span class="btn fill" style="margin-top:auto">Start shutdown</span>
+    </div>
+  </div>
+
+  <h2>02 <span class="cap">— Weekly review · MacBook / iPad</span></h2>
+  <p class="note">Six steps on a persistent index. This is step 02, Look back: the week's facts before judgement. Charts live only here and in step 03.</p>
+  <div class="grid" style="grid-template-columns:260px minmax(0,1fr) minmax(0,1fr) 300px">
+    <div class="tile dark" style="display:flex;flex-direction:column;grid-row:span 2">
+      <div style="display:flex;justify-content:space-between"><span class="cap mu">Weekly review</span><span class="od" style="width:7px;height:7px"></span></div>
+      <div class="dots" style="margin-top:14px"></div>
+      <div class="thin" style="font-size:64px;color:#7A7A7A;margin:14px 0 6px">02</div>
+      <div class="cap">Look back</div>
+      <div style="margin-top:26px">
+        <div class="step"><span class="n">01</span><span class="mu">Clear</span><span class="m bd" style="background:var(--t-light)"></span></div>
+        <div class="step on"><span class="n">02</span><span>Look back</span><span class="m od" style="width:8px;height:8px"></span></div>
+        <div class="step"><span class="n">03</span><span class="mu">Goals</span><span class="m hd" style="border-color:#555"></span></div>
+        <div class="step"><span class="n">04</span><span class="mu">Reflect</span><span class="m hd" style="border-color:#555"></span></div>
+        <div class="step"><span class="n">05</span><span class="mu">Look ahead</span><span class="m hd" style="border-color:#555"></span></div>
+        <div class="step"><span class="n">06</span><span class="mu">Close</span><span class="m hd" style="border-color:#555"></span></div>
+      </div>
+      <div class="mono mu" style="margin-top:auto;line-height:1.7">W42 · 13–19 OCT<br>18 MIN LEFT · SAVED</div>
+    </div>
+    <div class="tile">
+      <div class="cap mu">Planned vs done</div>
+      <div class="thin" style="font-size:84px;margin-top:22px">23<span style="color:var(--muted)">/31</span></div>
+      <div class="rule"></div>
+      <div class="mono" style="display:flex;justify-content:space-between"><span class="mu">RATE</span><span>74%</span></div>
+      <div class="mono" style="display:flex;justify-content:space-between;margin-top:8px"><span class="mu">LAST WEEK</span><span>68%</span></div>
+    </div>
+    <div class="tile">
+      <div class="cap mu">Deep work</div>
+      <div class="thin" style="font-size:84px;margin-top:22px">14.5<span style="font-size:28px;color:var(--muted);letter-spacing:0"> h</span></div>
+      <div class="rule"></div>
+      <div class="mono" style="display:flex;justify-content:space-between"><span class="mu">TARGET</span><span>15.0</span></div>
+      <div class="mono" style="display:flex;justify-content:space-between;margin-top:8px"><span class="mu">HABITS</span><span>11/14</span></div>
+    </div>
+    <div class="tile dark">
+      <div style="display:flex;justify-content:space-between"><span class="cap mu">Hours by day</span><span class="od" style="width:7px;height:7px"></span></div>
+      <div class="cols"><i style="height:62%"></i><i style="height:78%"></i><i style="height:70%"></i><i class="o" style="height:92%"></i><i style="height:55%"></i><i style="height:22%"></i><i style="height:10%"></i></div>
+      <div class="days"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+      <div class="rule"></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="thin" style="font-size:40px">38</span><span class="mono" style="color:var(--orange)">+4 VS LAST WEEK</span></div>
+    </div>
+    <div class="tile" style="grid-column:span 2">
+      <div style="display:flex;justify-content:space-between"><span class="cap mu">Attention per area · hours</span><span class="cap mu">| target</span></div>
+      <div class="rule"></div>
+      <div class="bar"><span class="code">WRK</span><div class="tr"><span style="width:88%"></span><i style="left:80%"></i></div><span class="v">31.5</span></div>
+      <div class="bar"><span class="code">HLT</span><div class="tr"><span style="width:22%"></span><i style="left:28%"></i></div><span class="v">4.0</span></div>
+      <div class="bar"><span class="code">REL</span><div class="tr"><span class="o" style="width:8%"></span><i style="left:20%"></i></div><span class="v" style="color:var(--orange)">1.5</span></div>
+      <div class="bar"><span class="code">FIN</span><div class="tr"><span style="width:6%"></span><i style="left:6%"></i></div><span class="v">1.0</span></div>
+      <div class="dots" style="margin-top:18px"></div>
+      <div style="display:flex;gap:10px;align-items:center;font-size:13px"><span class="od" style="width:7px;height:7px"></span>Relationships at 1.5 h against a 4 h target, third week in a row.</div>
+    </div>
+    <div class="tile">
+      <div style="display:flex;justify-content:space-between"><span class="cap mu">No next action</span><span class="mono mu">2</span></div>
+      <div class="rule"></div>
+      <div class="row"><span class="n">01</span><span>Grant renewal 2027</span><span class="code">WRK</span></div>
+      <div class="row"><span class="n">02</span><span>Pillar 3a top-up</span><span class="code">FIN</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:30px"><span class="btn" style="border-color:var(--line);color:var(--muted)">Back</span><span class="btn fill">Continue →</span></div>
+    </div>
+  </div>
+  <div class="strip" style="margin-top:14px">
+    <span class="loop"></span>
+    <span class="o">ITERATE</span>
+    <span class="mu" style="color:var(--t-muted)">Clear → Look back → Goals → Reflect → Look ahead → Close → Repeat</span>
+    <span style="margin-left:auto;display:flex;align-items:center;gap:8px"><span class="od" style="width:7px;height:7px"></span><span class="o">THE LOOP</span></span>
+  </div>
+
+  <h2>03 <span class="cap">— Goals &amp; areas · MacBook</span></h2>
+  <p class="note">One tile per life area with its standard, the quarter's goal, progress as a filled dot grid, and the next action. Orange marks what needs attention.</p>
+  <div class="grid" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+    <div class="tile dark" style="display:flex;flex-direction:column;min-height:360px">
+      <div style="display:flex;justify-content:space-between"><span class="cap mu">01 — WRK</span><span class="mono mu">31.5 h</span></div>
+      <div style="font-size:20px;margin-top:14px">Work / research</div>
+      <div class="mu" style="font-size:12.5px;margin-top:6px;line-height:1.5">One meaningful result per quarter. Two deep-work mornings a week.</div>
+      <div class="dots" style="margin:18px 0"></div>
+      <div class="cap mu">Goal</div>
+      <div style="font-size:14px;margin:6px 0 14px">Submit connectivity paper</div>
+      <div class="dgrid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i></div>
+      <div class="mono" style="margin-top:auto;padding-top:18px;display:flex;justify-content:space-between"><span class="mu">NEXT</span><span>Draft figure 2</span></div>
+    </div>
+    <div class="tile" style="display:flex;flex-direction:column;min-height:360px">
+      <div style="display:flex;justify-content:space-between"><span class="cap mu">02 — HLT</span><span class="mono mu">4.0 h</span></div>
+      <div style="font-size:20px;margin-top:14px">Health &amp; fitness</div>
+      <div class="mu" style="font-size:12.5px;margin-top:6px;line-height:1.5">Move every day. Sleep 7.5 h. Three runs a week.</div>
+      <div class="dots" style="margin:18px 0"></div>
+      <div class="cap mu">Goal</div>
+      <div style="font-size:14px;margin:6px 0 14px">Sub-50 10 km in November</div>
+      <div class="dgrid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i></div>
+      <div class="mono" style="margin-top:auto;padding-top:18px;display:flex;justify-content:space-between"><span class="mu">NEXT</span><span>Tempo run Tue</span></div>
+    </div>
+    <div class="tile" style="display:flex;flex-direction:column;min-height:360px">
+      <div style="display:flex;justify-content:space-between"><span class="cap mu">03 — REL</span><span class="mono" style="color:var(--orange)">1.5 h</span></div>
+      <div style="font-size:20px;margin-top:14px">Relationships &amp; family</div>
+      <div class="mu" style="font-size:12.5px;margin-top:6px;line-height:1.5">One unhurried family call a week. Friends twice a month.</div>
+      <div class="dots" style="margin:18px 0"></div>
+      <div class="cap mu">Goal</div>
+      <div style="font-size:14px;margin:6px 0 14px">Plan the December trip home</div>
+      <div class="dgrid"><i></i><i></i><i></i><i></i><i class="o"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i></div>
+      <div class="mono" style="margin-top:auto;padding-top:18px;display:flex;justify-content:space-between"><span class="mu">NEXT</span><span>Book train 20 Dec</span></div>
+    </div>
+    <div class="tile" style="display:flex;flex-direction:column;min-height:360px">
+      <div style="display:flex;justify-content:space-between"><span class="cap mu">04 — FIN</span><span class="mono mu">1.0 h</span></div>
+      <div style="font-size:20px;margin-top:14px">Finances &amp; admin</div>
+      <div class="mu" style="font-size:12.5px;margin-top:6px;line-height:1.5">Paperwork inbox empty every Friday. Savings rate on target.</div>
+      <div class="dots" style="margin:18px 0"></div>
+      <div class="cap mu">Goal</div>
+      <div style="font-size:14px;margin:6px 0 14px">Pillar 3a top-up by year end</div>
+      <div class="dgrid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i></div>
+      <div class="mono" style="margin-top:auto;padding-top:18px;display:flex;justify-content:space-between"><span class="mu">NEXT</span><span style="color:var(--orange)">None · 8 d idle</span></div>
+    </div>
+  </div>
+
+  <h2>04 <span class="cap">— iPhone · Today and daily shutdown</span></h2>
+  <p class="note">Single column with a bottom index and a capture button. The shutdown is a four-step flow for the thumb; the dark screen is its last step.</p>
+  <div class="tile" style="display:flex;gap:40px;justify-content:center;flex-wrap:wrap;padding:40px">
+    <div class="ph">
+      <div class="scr light">
+        <div class="notch"></div>
+        <div style="display:flex;justify-content:space-between"><span class="cap mu">Sat · W42</span><span class="od" style="width:7px;height:7px"></span></div>
+        <div style="display:flex;align-items:baseline;gap:10px;margin-top:6px"><span class="thin" style="font-size:72px">18</span><span class="cap">Oct</span></div>
+        <div style="font-size:14px;line-height:1.35;margin-top:4px">Finish figure 2 first.</div>
+        <div class="dots" style="margin:14px 0 4px"></div>
+        <div class="cap mu">Top 3</div>
+        <div class="row" style="padding:9px 0"><span class="box d"></span><span class="done" style="font-size:13.5px">Reviewer 2 comments</span><span class="code">WRK</span></div>
+        <div class="row" style="padding:9px 0"><span class="box"></span><span style="font-size:13.5px">Draft figure 2</span><span class="code">WRK</span></div>
+        <div class="row" style="padding:9px 0"><span class="box"></span><span style="font-size:13.5px">Q3 expense report</span><span class="code">FIN</span></div>
+        <div class="cap mu" style="margin-top:16px">Up next</div>
+        <div class="blk tb" style="position:static;margin-top:8px;font-size:13px">Zone 2 run<span class="cap">14:00 – 14:50 · HLT</span></div>
+        <div class="cap mu" style="margin-top:16px">Habits</div>
+        <div style="display:flex;gap:18px;margin-top:10px;font-size:12px">
+          <span style="display:flex;align-items:center;gap:8px"><i class="bd"></i>Stretch</span>
+          <span style="display:flex;align-items:center;gap:8px"><i class="hd"></i>Read</span>
+          <span style="display:flex;align-items:center;gap:8px"><i class="hd"></i>Reach out</span>
+        </div>
+        <div class="fab">+</div>
+        <div class="tabs"><span class="on">Today</span><span>Week</span><span>Goals</span><span>Journal</span><span>Review</span></div>
+      </div>
+    </div>
+    <div class="ph">
+      <div class="scr darkscr">
+        <div class="notch"></div>
+        <div style="display:flex;justify-content:space-between"><span class="cap mu">Daily shutdown</span><span class="cap mu">04 / 04</span></div>
+        <div style="display:flex;gap:4px;margin:12px 0 22px"><i style="flex:1;height:2px;background:var(--t-light)"></i><i style="flex:1;height:2px;background:var(--t-light)"></i><i style="flex:1;height:2px;background:var(--t-light)"></i><i style="flex:1;height:2px;background:var(--orange)"></i></div>
+        <div style="font-size:24px;line-height:1.2;letter-spacing:-.01em">What went well today?</div>
+        <div style="margin-top:14px;min-height:88px;padding:12px;border:1px solid var(--t-line);border-radius:10px;font-size:14px;line-height:1.5;color:var(--t-muted)">Figure 2 draft is done. Lost the afternoon to email again.</div>
+        <div class="cap mu" style="margin-top:18px">Mood</div>
+        <div style="display:flex;gap:6px;margin-top:8px"><span class="chip">1</span><span class="chip">2</span><span class="chip">3</span><span class="chip on">4</span><span class="chip">5</span></div>
+        <div class="cap mu" style="margin-top:14px">Energy</div>
+        <div style="display:flex;gap:6px;margin-top:8px"><span class="chip">1</span><span class="chip">2</span><span class="chip on">3</span><span class="chip">4</span><span class="chip">5</span></div>
+        <div class="mono mu" style="margin-top:18px;line-height:1.8">TOMORROW TOP 3 · SET<br>DEFERRED 2 · DROPPED 1</div>
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px;align-items:center">
+          <span class="btn" style="width:100%;background:var(--t-light);color:var(--ink);border-color:var(--t-light);padding:13px">Shutdown complete</span>
+          <span class="cap mu">Skip reflection tonight</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>05 <span class="cap">— System</span></h2>
+  <p class="note">Type, colour and icon rules. Less, but better.</p>
+  <div class="grid" style="grid-template-columns:260px minmax(0,1fr) 300px">
+    <div class="tile">
+      <div style="font-size:20px;line-height:1.2">Neue Haas<br>Grotesk</div>
+      <div class="mu" style="font-size:12px;margin-top:4px">fallback Helvetica Neue / Inter</div>
+      <div style="font-size:44px;margin-top:40px;letter-spacing:-.02em">AaBbCc</div>
+      <div style="font-size:18px;font-weight:300;margin-top:10px">0123456789</div>
+      <div class="mono" style="margin-top:14px">JetBrains Mono · LABELS ·%&amp;/–+@</div>
+    </div>
+    <div class="tile dark">
+      <div style="display:flex;justify-content:space-between"><span class="cap mu">Icons · 1.2 px outline</span><span class="od" style="width:7px;height:7px"></span></div>
+      <div class="icons" style="margin-top:26px"><i></i><i class="sq"></i><i class="ln"></i><i></i><i class="dd"></i><i class="sq" style="border-radius:50%;width:8px;height:8px"></i><i class="sq"></i><i class="ln" style="width:12px"></i><i class="sq" style="transform:rotate(45deg);width:16px;height:16px"></i><i class="sq"></i><i class="o"></i><i class="ln" style="transform:rotate(90deg)"></i><i class="dd"></i><i></i></div>
+      <div class="dots" style="margin-top:30px"></div>
+      <div class="mono mu">AREA CODES &nbsp; WRK · HLT · REL · FIN &nbsp;&nbsp; STATES &nbsp; ○ open · ● done · <span style="color:var(--orange)">●</span> attention</div>
+    </div>
+    <div class="tile">
+      <div class="cap mu">Colour</div>
+      <div class="sw" style="margin-top:16px"><i style="background:#ECEAE4"></i><i style="background:#E3E1DB"></i><i style="background:#141414"></i><i style="background:#6E6C67"></i><i style="background:#D8622A"></i></div>
+      <div class="mono mu" style="margin-top:12px;line-height:1.8">PAPER ECEAE4<br>TILE E3E1DB<br>INK 141414<br>MUTED 6E6C67<br>ORANGE D8622A · one per view</div>
+      <div class="dots" style="margin-top:18px"></div>
+      <div style="font-size:13px;line-height:1.5">No gradients, no shadows, no badges. Radius 14. Hairlines 1 px. Numerals weight 200.</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

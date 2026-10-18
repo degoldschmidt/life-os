@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+/* Life OS design tokens — Braun / Rams instrument bento. See docs/renders. */
+:root {
+  --paper: #eceae4;
+  --tile: #e3e1db;
+  --tile-2: #dad8d1;
+  --ink: #141414;
+  --ink-2: #1e1e1e;
+  --text: #161616;
+  --muted: #6e6c67;
+  --line: #c9c7c0;
+  --on-ink: #e9e7e1;
+  --on-ink-muted: #8b8984;
+  --line-dark: #2e2e2e;
+  --orange: #d8622a;
+  --radius-tile: 14px;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-tile: var(--tile);
+  --color-tile-2: var(--tile-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-on-ink: var(--on-ink);
+  --color-on-ink-muted: var(--on-ink-muted);
+  --color-line-dark: var(--line-dark);
+  --color-orange: var(--orange);
+  --radius-tile: var(--radius-tile);
+  --font-sans:
+    "Neue Haas Grotesk Display", "Helvetica Neue", var(--font-inter), Helvetica,
+    Arial, sans-serif;
+  --font-mono:
+    var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html {
+  background: var(--paper);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.4;
+  min-height: 100dvh;
+}
+
+/* Utilities that encode the system, so screens stay consistent. */
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@utility mono {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+}
+
+@utility thin {
+  font-weight: 200;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility hairline {
+  border-top: 1px solid var(--line);
+}
+
+@utility leader {
+  border-bottom: 1px dotted var(--line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 1.5px solid var(--orange);
+  outline-offset: 2px;
+}
