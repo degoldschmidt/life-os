@@ -22,7 +22,10 @@ export default function ReviewPage() {
         <Label className="mt-2 text-on-ink">Clear</Label>
         <Stepper steps={["Clear", "Look back", "Goals", "Reflect", "Look ahead", "Close"]} current={0} />
         <div className="mt-6">
-          <ButtonLink href="/shutdown" className="!border-on-ink !text-on-ink">Daily shutdown</ButtonLink>
+          <div className="flex flex-wrap gap-2">
+            <ButtonLink href="/plan" className="!border-on-ink !text-on-ink">Daily plan</ButtonLink>
+            <ButtonLink href="/shutdown" className="!border-on-ink !text-on-ink">Daily shutdown</ButtonLink>
+          </div>
         </div>
       </Tile>
       <Placeholder

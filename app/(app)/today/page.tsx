@@ -16,6 +16,7 @@ import { nextFreeRank, splitTop, summarizeDay } from "@/lib/planning";
 import { getSettings } from "@/lib/services/settings";
 import { listDay, listStale, materializeRecurring } from "@/lib/services/tasks";
 import { listHabitStatuses } from "@/lib/services/habits";
+import { getMorningIntention } from "@/lib/services/journal";
 
 export const metadata: Metadata = { title: "Today" };
 
@@ -27,10 +28,11 @@ export default async function TodayPage() {
   const week = periodFor("week", key, settings.tz);
 
   await materializeRecurring(user.id, key);
-  const [dayTasks, stale, habits] = await Promise.all([
+  const [dayTasks, stale, habits, intention] = await Promise.all([
     listDay(user.id, key),
     listStale(user.id, key),
     listHabitStatuses(user.id, key),
+    getMorningIntention(user.id, key),
   ]);
   const dueHabits = habits.filter((h) => h.status.dueToday || h.status.doneToday);
 
@@ -50,12 +52,22 @@ export default async function TodayPage() {
         <ThinNumber size={112} className="mt-5">{format(d, "d")}</ThinNumber>
         <Label className="mt-1 text-on-ink">{format(d, "MMMM yyyy")}</Label>
         <Rule dotted className="my-5" />
-        <Label>Focus</Label>
+        <Label>{intention ? "Intention" : "Focus"}</Label>
         <p className="mt-2 text-[16px] leading-[1.35]">
-          {focus ? focus.title : <span className="text-muted">Pick a Top 3 task to set today&apos;s focus.</span>}
+          {intention ? (
+            intention
+          ) : focus ? (
+            focus.title
+          ) : (
+            <span className="text-muted">Plan the day to set an intention and a Top 3.</span>
+          )}
         </p>
+        {intention && focus ? <p className="mono mt-3 text-muted">TOP 1 · {focus.title}</p> : null}
         <div className="mt-auto pt-6">
-          <ButtonLink href="/shutdown" className="!border-on-ink !text-on-ink">Start shutdown</ButtonLink>
+          <div className="flex flex-wrap gap-2">
+            <ButtonLink href="/plan" className="!border-on-ink !text-on-ink">Plan day</ButtonLink>
+            <ButtonLink href="/shutdown" className="!border-on-ink !text-on-ink">Shutdown</ButtonLink>
+          </div>
           <div className="mt-4 flex justify-between">
             <Mono className="text-muted">{s.open} OPEN</Mono>
             <Mono className="text-muted">SHUTDOWN {settings.shutdownTime}</Mono>

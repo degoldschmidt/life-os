@@ -264,3 +264,10 @@ export async function listPlannedFor(userId: string, day: DayKey): Promise<TaskW
   );
   return flat(rows);
 }
+
+export async function listSomeday(userId: string): Promise<TaskWithArea[]> {
+  const rows = await select()
+    .where(and(eq(tasks.userId, userId), eq(tasks.when, "someday"), eq(tasks.status, "todo"), notTemplate))
+    .orderBy(desc(tasks.createdAt));
+  return flat(rows);
+}
