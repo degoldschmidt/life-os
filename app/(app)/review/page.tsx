@@ -38,6 +38,7 @@ export default async function ReviewHub() {
             <p className="mt-3 max-w-[460px] text-[16px] leading-[1.4]">Look back before you look ahead. The weekly review is the habit that keeps the rest honest.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <ButtonLink href="/review/trends" className="!border-on-ink !text-on-ink">Trends</ButtonLink>
             <ButtonLink href="/plan" className="!border-on-ink !text-on-ink">Daily plan</ButtonLink>
             <ButtonLink href="/shutdown" className="!border-on-ink !text-on-ink">{todayDay?.status === "final" ? "Shutdown done" : "Daily shutdown"}</ButtonLink>
           </div>
