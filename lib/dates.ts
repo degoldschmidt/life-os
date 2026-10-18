@@ -112,3 +112,21 @@ export function formatHoursMinutes(minutes: number): string {
   const m = Math.round(minutes % 60);
   return `${h}:${String(m).padStart(2, "0")}`;
 }
+
+/** "W42 · 12–18 Oct 2026", "October 2026", "Q4 2026", "2026". */
+export function formatPeriodLabel(p: Period, tz: string = DEFAULT_TZ): string {
+  const s = dayKeyToDate(p.start, tz);
+  const e = dayKeyToDate(p.end, tz);
+  switch (p.type) {
+    case "day":
+      return format(s, "EEE d MMM yyyy");
+    case "week":
+      return `${p.id.split("-")[1]} · ${format(s, "d MMM")} – ${format(e, "d MMM yyyy")}`;
+    case "month":
+      return format(s, "MMMM yyyy");
+    case "quarter":
+      return `${p.id.split("-")[1]} ${p.id.split("-")[0]}`;
+    case "year":
+      return p.id;
+  }
+}

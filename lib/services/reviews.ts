@@ -1,6 +1,8 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
-import type { DayKey } from "@/lib/dates";
+import type { DayKey, Period, ReviewType } from "@/lib/dates";
+import type { PeriodStats } from "@/lib/services/stats";
+import { cleanTop, extractScores } from "@/lib/review";
 
 const { reviews, reviewTemplates, reviewScores, journalEntries } = schema;
 
@@ -51,7 +53,7 @@ export async function getOrCreateDayReview(userId: string, day: DayKey): Promise
 export async function saveProgress(
   userId: string,
   reviewId: string,
-  patch: { step?: number; answers?: DayAnswers },
+  patch: { step?: number; answers?: Record<string, unknown> },
 ): Promise<void> {
   const [row] = await db()
     .select()
@@ -138,4 +140,118 @@ export async function finalizeDayReview(
       });
     }
   });
+}
+
+
+export type ReviewTemplate = typeof reviewTemplates.$inferSelect;
+
+/** The review for any period, created on first open so a half-finished one can be resumed. */
+export async function getOrCreateReview(userId: string, type: ReviewType, period: Period): Promise<{ review: Review; template: ReviewTemplate }> {
+  const tpl = await latestTemplate(type);
+  const find = () =>
+    db()
+      .select()
+      .from(reviews)
+      .where(and(eq(reviews.userId, userId), eq(reviews.type, type), eq(reviews.periodId, period.id)))
+      .limit(1);
+  let [review] = await find();
+  if (!review) {
+    await db()
+      .insert(reviews)
+      .values({ userId, type, periodId: period.id, periodStart: period.start, periodEnd: period.end, templateId: tpl.id })
+      .onConflictDoNothing({ target: [reviews.userId, reviews.type, reviews.periodId] });
+    [review] = await find();
+  }
+  // A review keeps the template version it started with, so edits never rewrite history.
+  const [template] = await db().select().from(reviewTemplates).where(eq(reviewTemplates.id, review.templateId)).limit(1);
+  return { review, template: template ?? tpl };
+}
+
+export async function getReviewById(userId: string, id: string): Promise<Review | null> {
+  const [r] = await db().select().from(reviews).where(and(eq(reviews.userId, userId), eq(reviews.id, id))).limit(1);
+  return r ?? null;
+}
+
+/**
+ * Close a review: freeze the numbers, write flat scores for trends, keep the "next top 3",
+ * and carry quarterly area ratings back onto the areas themselves.
+ */
+export async function finalizeReview(userId: string, reviewId: string, stats: PeriodStats): Promise<void> {
+  const [row] = await db().select().from(reviews).where(and(eq(reviews.userId, userId), eq(reviews.id, reviewId))).limit(1);
+  if (!row || row.status === "final") return;
+  const answers = row.answers as Record<string, unknown>;
+  const top = cleanTop(answers.top3 ?? answers.improvements);
+
+  const scores = extractScores({
+    tasks: stats.tasks,
+    deepMin: stats.deepMin,
+    habitRate: stats.habitRate,
+    mood: stats.mood,
+    energy: stats.energy,
+    areas: stats.areas,
+    answers,
+  });
+
+  await db().transaction(async (tx) => {
+    await tx
+      .update(reviews)
+      .set({ status: "final", finalizedAt: new Date(), statsSnapshot: stats as unknown as Record<string, unknown>, nextTop3: top, updatedAt: new Date() })
+      .where(eq(reviews.id, reviewId));
+    await tx.delete(reviewScores).where(eq(reviewScores.reviewId, reviewId));
+    const rows = Object.entries(scores).map(([key, value]) => ({ userId, reviewId, key, value }));
+    if (rows.length) await tx.insert(reviewScores).values(rows);
+
+    const standards = answers.area_standards;
+    if (row.type === "year" && standards && typeof standards === "object") {
+      for (const [code, v] of Object.entries(standards as Record<string, unknown>)) {
+        if (typeof v === "string" && v.trim()) {
+          await tx
+            .update(schema.areas)
+            .set({ standard: v.trim().slice(0, 300), updatedAt: new Date() })
+            .where(and(eq(schema.areas.userId, userId), eq(schema.areas.code, code)));
+        }
+      }
+    }
+
+    const rated = answers.area_scores;
+    if (row.type === "quarter" && rated && typeof rated === "object") {
+      for (const [code, v] of Object.entries(rated as Record<string, unknown>)) {
+        if (typeof v === "number" && v >= 1 && v <= 10) {
+          await tx
+            .update(schema.areas)
+            .set({ satisfaction: Math.round(v), updatedAt: new Date() })
+            .where(and(eq(schema.areas.userId, userId), eq(schema.areas.code, code)));
+        }
+      }
+    }
+  });
+}
+
+/** Re-open a finished review for edits. Its scores stay until it is finished again. */
+export async function reopenReview(userId: string, reviewId: string): Promise<void> {
+  await db()
+    .update(reviews)
+    .set({ status: "draft", finalizedAt: null, updatedAt: new Date() })
+    .where(and(eq(reviews.userId, userId), eq(reviews.id, reviewId)));
+}
+
+export type ReviewListItem = Pick<Review, "id" | "type" | "periodId" | "periodStart" | "periodEnd" | "status" | "currentStep" | "finalizedAt" | "updatedAt">;
+
+export async function listReviews(userId: string, types: ReviewType[], limit = 60): Promise<ReviewListItem[]> {
+  return db()
+    .select({
+      id: reviews.id,
+      type: reviews.type,
+      periodId: reviews.periodId,
+      periodStart: reviews.periodStart,
+      periodEnd: reviews.periodEnd,
+      status: reviews.status,
+      currentStep: reviews.currentStep,
+      finalizedAt: reviews.finalizedAt,
+      updatedAt: reviews.updatedAt,
+    })
+    .from(reviews)
+    .where(and(eq(reviews.userId, userId), inArray(reviews.type, types)))
+    .orderBy(desc(reviews.periodStart))
+    .limit(limit);
 }

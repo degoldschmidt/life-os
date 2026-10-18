@@ -85,3 +85,26 @@ export function habitStatus(schedule: HabitSchedule, doneDays: Set<DayKey>, toda
 
   return { dueToday, doneToday, missedLastDue, grid, rate, doneInWindow, dueInWindow };
 }
+
+/** Completion of one habit over [from, to]: done ÷ due, null when nothing was due. */
+export function habitPeriodStats(
+  schedule: HabitSchedule,
+  doneDays: Set<DayKey>,
+  from: DayKey,
+  to: DayKey,
+): { done: number; due: number; rate: number | null } {
+  const days: DayKey[] = [];
+  for (let d = from; d <= to; d = addDays(d, 1)) days.push(d);
+  const doneInRange = days.filter((d) => doneDays.has(d)).length;
+  let due: number;
+  let done: number;
+  if ("perWeek" in schedule) {
+    due = Math.max(1, Math.round((days.length / 7) * Math.max(1, schedule.perWeek)));
+    done = Math.min(doneInRange, due);
+  } else {
+    const scheduled = days.filter((d) => isDayScheduled(schedule, d));
+    due = scheduled.length;
+    done = scheduled.filter((d) => doneDays.has(d)).length;
+  }
+  return { done, due, rate: due ? done / due : null };
+}
