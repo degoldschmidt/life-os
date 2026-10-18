@@ -23,6 +23,9 @@ export async function sendMagicLink(formData: FormData) {
     email,
     options: { emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`, shouldCreateUser: true },
   });
-  if (error) redirect("/login?error=send-failed");
+  if (error) {
+    console.error("[login] signInWithOtp failed:", error.code ?? error.status, error.message);
+    redirect(error.code === "over_email_send_rate_limit" ? "/login?error=rate-limit" : "/login?error=send-failed");
+  }
   redirect("/login?sent=1");
 }

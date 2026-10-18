@@ -11,6 +11,7 @@ const ERRORS: Record<string, string> = {
   "not-allowed": "That account isn't allowed here. Life OS is a single-user system.",
   "not-configured": "Supabase isn't configured yet. See docs/SETUP.md.",
   "link-invalid": "That sign-in link is invalid or expired. Request a new one.",
+  "rate-limit": "Too many sign-in emails for now. Wait about an hour, or set up custom SMTP in Supabase.",
   "send-failed": "Couldn't send the link. Check the email and try again.",
 };
 
