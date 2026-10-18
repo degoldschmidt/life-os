@@ -10,7 +10,7 @@ export type CurrentUser = { id: string; email: string };
  */
 function devPreviewUser(): CurrentUser | null {
   if (process.env.NODE_ENV !== "development" || process.env.DEV_PREVIEW_USER !== "1") return null;
-  return { id: "00000000-0000-4000-8000-000000000000", email: "preview@localhost" };
+  return { id: process.env.DEV_PREVIEW_USER_ID ?? "00000000-0000-4000-8000-000000000000", email: "preview@localhost" };
 }
 
 /** The signed-in, allow-listed user, or null. Memoised per request. */
@@ -26,3 +26,10 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   if (!isAllowedEmail(email)) return null;
   return { id: claims.sub, email: email as string };
 });
+
+/** For server actions and route handlers: the current user or a thrown error. */
+export async function requireUser(): Promise<CurrentUser> {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Not signed in");
+  return user;
+}

@@ -2,6 +2,9 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { PhoneTabs, SideNav } from "./nav";
 import { Label, Mono } from "@/components/ui/label";
+import { CaptureProvider } from "@/components/capture/capture-provider";
+import { AutoRefresh } from "./auto-refresh";
+import { CaptureButton, SearchButton } from "./capture-buttons";
 
 const AREAS = [
   { code: "WRK", name: "Work" },
@@ -10,8 +13,10 @@ const AREAS = [
   { code: "FIN", name: "Finances" },
 ];
 
-export function AppShell({ children, email }: { children: ReactNode; email: string }) {
+export function AppShell({ children, email, inboxCount = 0 }: { children: ReactNode; email: string; inboxCount?: number }) {
   return (
+    <CaptureProvider>
+    <AutoRefresh />
     <div className="mx-auto flex w-full max-w-[1400px] flex-1 md:grid md:grid-cols-[200px_minmax(0,1fr)]">
       <aside className="hidden border-r border-line px-3 py-5 md:flex md:flex-col">
         <Link href="/today" className="mb-5 flex items-center gap-2 px-[10px] text-[15px] font-medium">
@@ -31,12 +36,10 @@ export function AppShell({ children, email }: { children: ReactNode; email: stri
         <div className="mt-auto px-[10px]">
           <Link href="/inbox" className="flex items-center justify-between text-[13px] text-muted hover:text-text">
             <span>Inbox</span>
-            <Mono className="text-muted">C</Mono>
+            <Mono className={inboxCount ? "text-orange" : "text-muted"}>{inboxCount || "I"}</Mono>
           </Link>
-          <div className="mt-3 flex items-center justify-between text-[13px] text-muted">
-            <span>Search</span>
-            <Mono className="text-muted">⌘K</Mono>
-          </div>
+          <CaptureButton />
+          <SearchButton />
           <form action="/auth/signout" method="post" className="mt-6">
             <button type="submit" className="label text-muted hover:text-text" title={email}>
               Sign out
@@ -46,13 +49,8 @@ export function AppShell({ children, email }: { children: ReactNode; email: stri
       </aside>
       <main className="flex-1 px-4 pb-28 pt-5 md:px-6 md:pb-10 md:pt-6">{children}</main>
       <PhoneTabs />
-      <Link
-        href="/inbox"
-        aria-label="Capture"
-        className="fixed bottom-[88px] right-[18px] z-20 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-ink text-[26px] font-extralight text-on-ink md:hidden"
-      >
-        +
-      </Link>
+      <CaptureButton fab />
     </div>
+    </CaptureProvider>
   );
 }
