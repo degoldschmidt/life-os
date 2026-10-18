@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { dayKeyToDate, todayKey } from "@/lib/dates";
 import { getSettings } from "@/lib/services/settings";
 import { getMorningIntention } from "@/lib/services/journal";
-import { listDay, listInbox, listSomeday, listStale, materializeRecurring } from "@/lib/services/tasks";
+import { listAnytime, listDay, listInbox, listSomeday, listStale, materializeRecurring } from "@/lib/services/tasks";
 
 export const metadata: Metadata = { title: "Daily plan" };
 
@@ -15,9 +15,10 @@ export default async function PlanPage() {
   const today = todayKey(settings.tz, settings.dayStartHour);
   await materializeRecurring(user.id, today);
 
-  const [stale, inbox, someday, dayTasks, intention] = await Promise.all([
+  const [stale, inbox, anytime, someday, dayTasks, intention] = await Promise.all([
     listStale(user.id, today),
     listInbox(user.id),
+    listAnytime(user.id),
     listSomeday(user.id),
     listDay(user.id, today),
     getMorningIntention(user.id, today),
@@ -36,6 +37,7 @@ export default async function PlanPage() {
       stale={stale.map((t) => ({ ...pick(t), source: "stale" as const }))}
       pull={[
         ...inbox.map((t) => ({ ...pick(t), source: "inbox" as const })),
+        ...anytime.map((t) => ({ ...pick(t), source: "project" as const })),
         ...someday.map((t) => ({ ...pick(t), source: "someday" as const })),
       ]}
       today={dayTasks

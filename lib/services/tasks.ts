@@ -18,7 +18,7 @@ export type NewTask = {
   estimateMin?: number | null;
   deadline?: DayKey | null;
   /** Where the task starts: inbox (default), today, or a specific day. */
-  plan?: { kind: "inbox" } | { kind: "today"; day: DayKey } | { kind: "date"; day: DayKey } | { kind: "someday" };
+  plan?: { kind: "inbox" } | { kind: "today"; day: DayKey } | { kind: "date"; day: DayKey } | { kind: "someday" } | { kind: "anytime" };
   recurrence?: Recurrence | null;
 };
 
@@ -57,6 +57,9 @@ export async function createTask(userId: string, input: NewTask): Promise<Task> 
       break;
     case "someday":
       values.when = "someday";
+      break;
+    case "anytime":
+      values.when = "anytime";
       break;
   }
   if (input.recurrence) {
@@ -268,6 +271,14 @@ export async function listPlannedFor(userId: string, day: DayKey): Promise<TaskW
 export async function listSomeday(userId: string): Promise<TaskWithArea[]> {
   const rows = await select()
     .where(and(eq(tasks.userId, userId), eq(tasks.when, "someday"), eq(tasks.status, "todo"), notTemplate))
+    .orderBy(desc(tasks.createdAt));
+  return flat(rows);
+}
+
+/** Open tasks that belong somewhere (e.g. a project's next action) but have no day yet. */
+export async function listAnytime(userId: string): Promise<TaskWithArea[]> {
+  const rows = await select()
+    .where(and(eq(tasks.userId, userId), eq(tasks.when, "anytime"), eq(tasks.status, "todo"), notTemplate))
     .orderBy(desc(tasks.createdAt));
   return flat(rows);
 }

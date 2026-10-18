@@ -14,7 +14,7 @@ import { completePlan } from "@/app/actions/plan";
 import { formatHoursMinutes } from "@/lib/dates";
 
 export type PlanTask = { id: string; title: string; areaCode: string | null; estimateMin: number | null; planRank: number | null };
-export type Candidate = { id: string; title: string; areaCode: string | null; estimateMin: number | null; source: "stale" | "inbox" | "someday" };
+export type Candidate = { id: string; title: string; areaCode: string | null; estimateMin: number | null; source: "stale" | "inbox" | "project" | "someday" };
 
 const STEPS = ["Review", "Pull", "Shape", "Intention"];
 const pill =
@@ -105,7 +105,7 @@ export function PlanFlow({
         {step === 1 ? (
           <>
             <Label>Pull into today</Label>
-            <p className="mt-2 text-[14px] text-muted">From the Inbox and Someday. Add only what you will really do.</p>
+            <p className="mt-2 text-[14px] text-muted">From the Inbox, project next actions and Someday. Add only what you will really do.</p>
             <Rule dotted />
             {pull.length === 0 ? (
               <p className="py-6 text-[16px] text-muted">Inbox and Someday are empty.</p>

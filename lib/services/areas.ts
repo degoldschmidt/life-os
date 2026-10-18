@@ -19,3 +19,16 @@ export async function areaIdByCode(userId: string, code: string): Promise<string
     .limit(1);
   return row?.id ?? null;
 }
+
+export async function updateArea(
+  userId: string,
+  code: string,
+  patch: { name?: string; standard?: string | null; weeklyTargetHours?: number | null; satisfaction?: number | null },
+): Promise<void> {
+  const clean = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined));
+  if (!Object.keys(clean).length) return;
+  await db()
+    .update(schema.areas)
+    .set({ ...clean, updatedAt: new Date() })
+    .where(and(eq(schema.areas.userId, userId), eq(schema.areas.code, code.toUpperCase())));
+}
