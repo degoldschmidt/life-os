@@ -21,6 +21,7 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://example.supabase.co",
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publishable_ci_dummy",
       AUTH_ALLOWED_EMAIL: process.env.AUTH_ALLOWED_EMAIL ?? "ci@example.com",
+      CRON_SECRET: "e2e-cron-secret",
     },
   },
 });

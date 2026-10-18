@@ -49,19 +49,45 @@ pnpm db:seed
 3. Deploy. Preview deployments get their own URLs; add them to Supabase redirect URLs if you
    want to sign in on previews.
 
-## 4. Install on your devices
+## 4. External scheduler (required)
+
+Vercel's Hobby plan runs cron jobs at most once a day, and Supabase pauses free projects
+after seven days without API activity. Life OS therefore exposes its scheduled jobs as HTTP
+endpoints and lets a free external scheduler call them:
+
+```
+GET https://<your-domain>/api/cron/heartbeat      every 10 minutes
+GET https://<your-domain>/api/cron/calendar-sync  every 10 minutes (phase 4)
+GET https://<your-domain>/api/cron/reminders      every 5 minutes (phase 2)
+```
+
+Each request must carry the header `Authorization: Bearer <CRON_SECRET>`.
+
+1. Generate a secret: `openssl rand -hex 32`. Put it in `.env.local` and in Vercel as `CRON_SECRET`.
+2. Create a free account at https://cron-job.org (or use any scheduler that can send a header,
+   for example a GitHub Actions `schedule` workflow or Uptime Kuma).
+3. Add a job per endpoint above: method GET, schedule as listed, and under Advanced add the
+   request header `Authorization` with value `Bearer <your secret>`.
+4. Run the heartbeat job once by hand; the response is JSON with `ok: true`, the database
+   time and the Supabase API status.
+
+The heartbeat is what keeps the Supabase free project awake while you are on holiday. Listing
+the jobs without a token returns 401; an unknown job name returns 404 with the known names.
+
+## 5. Install on your devices
 
 - **iPhone / iPad:** open the production URL in Safari → Share → **Add to Home Screen**.
   The app runs standalone, and Web Push works from the installed icon (phase 2).
 - **Mac:** Safari → File → **Add to Dock**, or use it in any browser.
 
-## 5. Later phases (keys you will need)
+## 6. Later phases (keys you will need)
 
 | Phase | Secret | Where to get it |
 |---|---|---|
 | 4 | `ANTHROPIC_API_KEY` | https://console.anthropic.com |
 | 4 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google Cloud → OAuth client (Web), redirect `https://<domain>/api/google/callback`; publish the consent screen to **Production** or refresh tokens expire after 7 days |
 | 4 | `NOTION_TOKEN` | Notion → Settings → Integrations → internal integration; share the pages/databases with it |
+| 0 | `CRON_SECRET` | `openssl rand -hex 32`; shared with the external scheduler |
 | 4 | `MCP_TOKEN` | any long random string; used by Claude Code to call `/api/mcp` |
 | 4 | `TOKEN_ENCRYPTION_KEY` | `openssl rand -base64 32`; encrypts OAuth tokens at rest |
 | 2 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | `pnpm dlx web-push generate-vapid-keys` |

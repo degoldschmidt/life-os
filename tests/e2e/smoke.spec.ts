@@ -19,3 +19,13 @@ test("offline page renders", async ({ page }) => {
   await page.goto("/offline");
   await expect(page.getByText("No connection")).toBeVisible();
 });
+
+test("cron endpoint requires the bearer secret", async ({ request }) => {
+  const denied = await request.get("/api/cron/heartbeat");
+  expect(denied.status()).toBe(401);
+  const unknown = await request.get("/api/cron/nope", { headers: { authorization: "Bearer e2e-cron-secret" } });
+  expect(unknown.status()).toBe(404);
+  const ok = await request.get("/api/cron/heartbeat", { headers: { authorization: "Bearer e2e-cron-secret" } });
+  expect(ok.ok()).toBeTruthy();
+  expect((await ok.json()).job).toBe("heartbeat");
+});
