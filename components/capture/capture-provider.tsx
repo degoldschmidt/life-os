@@ -25,6 +25,7 @@ const EXTRA = [
   { label: "Daily shutdown", href: "/shutdown" },
   { label: "Weekly review", href: "/review" },
   { label: "Trends", href: "/review/trends" },
+  { label: "Import", href: "/import" },
 ];
 
 function isTyping(el: EventTarget | null) {

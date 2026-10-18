@@ -40,3 +40,21 @@ export async function searchAll(userId: string, query: string, limit = 20): Prom
     ...j.map<SearchHit>((x) => ({ kind: "journal", id: x.id, title: x.date, snippet: snip(x.text), date: x.date })),
   ].slice(0, limit);
 }
+
+/** Create a note, or refresh it when the same source and external id was imported before. */
+export async function upsertNote(
+  userId: string,
+  input: { title: string; content: string; source: "manual" | "notion" | "apple_notes"; externalId: string; areaId?: string | null },
+): Promise<"created" | "updated"> {
+  const existing = await db()
+    .select({ id: notes.id })
+    .from(notes)
+    .where(and(eq(notes.userId, userId), eq(notes.source, input.source), eq(notes.externalId, input.externalId)))
+    .limit(1);
+  if (existing[0]) {
+    await db().update(notes).set({ title: input.title.trim() || "Untitled", contentMd: input.content, updatedAt: new Date() }).where(eq(notes.id, existing[0].id));
+    return "updated";
+  }
+  await db().insert(notes).values({ userId, title: input.title.trim() || "Untitled", contentMd: input.content, source: input.source, externalId: input.externalId, areaId: input.areaId ?? null });
+  return "created";
+}

@@ -84,6 +84,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
           <p className="text-[14px] text-muted">Everything you enter is yours. Download it any time.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <a href="/api/export/json" className="inline-flex rounded-full border-[1.2px] border-text px-[18px] py-[9px] font-mono text-[12px] uppercase tracking-[0.04em]">Export JSON</a>
+            <a href="/import" className="inline-flex rounded-full border border-line px-[18px] py-[9px] font-mono text-[12px] uppercase tracking-[0.04em] text-muted">Import</a>
             <a href="/api/export/markdown" className="inline-flex rounded-full border-[1.2px] border-text px-[18px] py-[9px] font-mono text-[12px] uppercase tracking-[0.04em]">Export Markdown vault</a>
           </div>
           <p className="mt-4 text-[13px] text-muted">The Markdown vault opens in Obsidian: one note per day, one per review, plus areas and goals.</p>
@@ -112,7 +113,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
             {gmsg ? <p className="mt-2 text-[13px] text-orange">{gmsg}</p> : null}
           </div>
           <Status ok={env("ANTHROPIC_API_KEY")} label="Claude assistant" hint="Review drafts, top-3 proposals, brain dump" />
-          <Status ok={env("NOTION_TOKEN")} label="Notion import" />
+          <Status ok={env("NOTION_TOKEN")} label="Notion import" hint="Import pages and databases on the Import screen" />
           <Status ok={env("MCP_TOKEN")} label="Claude Code (MCP)" hint="Lets Claude Code read and write your Life OS" />
           <Status ok={env("VAPID_PUBLIC_KEY") && env("VAPID_PRIVATE_KEY")} label="Push reminders" />
         </Tile>
