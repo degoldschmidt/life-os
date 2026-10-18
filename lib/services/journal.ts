@@ -115,3 +115,14 @@ export async function recentDays(userId: string, since: DayKey, until: DayKey): 
     };
   });
 }
+
+/** Text the user wrote in a period (notes, day notes, shutdown reflections), oldest first. */
+export async function entryTextsInRange(userId: string, from: DayKey, to: DayKey, limit = 60): Promise<string[]> {
+  const rows = await db()
+    .select({ date: journalEntries.date, kind: journalEntries.kind, text: journalEntries.contentMd })
+    .from(journalEntries)
+    .where(and(eq(journalEntries.userId, userId), gte(journalEntries.date, from), lte(journalEntries.date, to)))
+    .orderBy(asc(journalEntries.date), asc(journalEntries.createdAt))
+    .limit(limit);
+  return rows.filter((r) => r.text.trim()).map((r) => `${r.date} (${r.kind}) ${r.text.trim()}`);
+}

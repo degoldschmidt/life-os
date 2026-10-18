@@ -14,6 +14,7 @@ import { listAreas } from "@/lib/services/areas";
 import { getOrCreateReview } from "@/lib/services/reviews";
 import { computePeriodStats, type PeriodStats } from "@/lib/services/stats";
 import { listInbox } from "@/lib/services/tasks";
+import { aiAvailable } from "@/lib/ai/run";
 
 export const metadata: Metadata = { title: "Review" };
 
@@ -60,6 +61,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ type: s
         initialAnswers={review.answers as Record<string, unknown>}
         stats={stats}
         areas={areas.map((a) => ({ code: a.code, name: a.name, standard: a.standard }))}
+        aiEnabled={aiAvailable()}
         inbox={inbox.map((x) => ({ id: x.id, title: x.title, areaCode: x.areaCode, estimateMin: x.estimateMin, status: x.status, planRank: x.planRank, deadline: x.deadline }))}
       />
     );

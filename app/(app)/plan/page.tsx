@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { format } from "date-fns";
 import { PlanFlow } from "@/components/plan/plan-flow";
+import { aiAvailable } from "@/lib/ai/run";
 import { requireUser } from "@/lib/auth";
 import { dayKeyToDate, todayKey } from "@/lib/dates";
 import { getSettings } from "@/lib/services/settings";
@@ -45,6 +46,7 @@ export default async function PlanPage() {
         .map((t) => ({ ...pick(t), planRank: t.planRank }))}
       capacityMin={settings.dailyCapacityMin}
       initialIntention={intention ?? ""}
+      aiEnabled={aiAvailable()}
     />
   );
 }

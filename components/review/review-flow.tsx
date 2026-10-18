@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { TaskRow, type TaskView } from "@/components/tasks/task-row";
 import { StatsPanel } from "@/components/review/stats-panel";
 import { dumpToInbox, finishReview, saveReviewProgress } from "@/app/actions/review";
+import { generateReviewDraft } from "@/app/actions/ai";
 import { dotsFor } from "@/lib/goals";
 import type { ReviewQuestion } from "@/lib/db/schema";
 import type { PeriodStats } from "@/lib/services/stats";
@@ -43,6 +44,7 @@ export function ReviewFlow({
   stats,
   areas,
   inbox,
+  aiEnabled = false,
 }: {
   type: "week" | "month" | "quarter" | "year";
   periodId: string;
@@ -53,6 +55,7 @@ export function ReviewFlow({
   stats: PeriodStats;
   areas: FlowArea[];
   inbox: TaskView[];
+  aiEnabled?: boolean;
 }) {
   const router = useRouter();
   const [step, setStep] = useState(Math.min(initialStep, steps.length - 1));
@@ -60,7 +63,9 @@ export function ReviewFlow({
   const [dump, setDump] = useState("");
   const [dumped, setDumped] = useState<number | null>(null);
   const [pending, start] = useTransition();
+  const [draftMsg, setDraftMsg] = useState<string | null>(null);
   const current = steps[step];
+  const hasText = current.questions.some((q) => q.kind === "text");
   const panel = panelFor(type, current.id);
   const set = (key: string, value: unknown) => setAnswers((a) => ({ ...a, [key]: value }));
   /** Update one answer from its latest value, so quick successive edits never overwrite each other. */
@@ -203,6 +208,32 @@ export function ReviewFlow({
               ))
             )}
             <p className="label mt-3 text-muted"><Link href="/goals" className="underline">Update key results on Goals</Link>. Your answers here are saved.</p>
+          </div>
+        ) : null}
+
+        {aiEnabled && hasText ? (
+          <div className="mb-5 flex flex-wrap items-center gap-3">
+            <Button
+              variant="quiet"
+              disabled={pending}
+              onClick={() =>
+                start(async () => {
+                  setDraftMsg(null);
+                  const r = await generateReviewDraft(type, periodId);
+                  if (!r.ok) { setDraftMsg(r.error); return; }
+                  // Fill only what you haven't written yourself.
+                  setAnswers((a) => {
+                    const next = { ...a };
+                    for (const [id, text] of Object.entries(r.data)) if (!(typeof next[id] === "string" && (next[id] as string).trim())) next[id] = text;
+                    return next;
+                  });
+                  setDraftMsg("Draft added to empty answers. Edit freely.");
+                })
+              }
+            >
+              {pending ? "Drafting…" : "Draft with Claude"}
+            </Button>
+            {draftMsg ? <Mono className={draftMsg.startsWith("Draft") ? "text-muted" : "text-orange"}>{draftMsg.toUpperCase()}</Mono> : null}
           </div>
         ) : null}
 

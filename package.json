@@ -19,6 +19,7 @@
     "check": "pnpm typecheck && pnpm lint && pnpm test"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
     "@date-fns/tz": "1.5.0",
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.118.0",

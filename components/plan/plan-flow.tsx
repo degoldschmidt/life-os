@@ -11,6 +11,7 @@ import { Meter } from "@/components/ui/meter";
 import { Button } from "@/components/ui/button";
 import { dropTask, planToday, planTomorrow, setEstimate, setTop, somedayTask } from "@/app/actions/tasks";
 import { completePlan } from "@/app/actions/plan";
+import { SuggestTop } from "@/components/ai/suggest-top";
 import { formatHoursMinutes } from "@/lib/dates";
 
 export type PlanTask = { id: string; title: string; areaCode: string | null; estimateMin: number | null; planRank: number | null };
@@ -28,6 +29,7 @@ export function PlanFlow({
   today,
   capacityMin,
   initialIntention,
+  aiEnabled = false,
 }: {
   dateLabel: string;
   stale: Candidate[];
@@ -35,6 +37,7 @@ export function PlanFlow({
   today: PlanTask[];
   capacityMin: number;
   initialIntention: string;
+  aiEnabled?: boolean;
 }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -131,6 +134,13 @@ export function PlanFlow({
             </div>
             <p className="mt-2 text-[14px] text-muted">Rank your Top 3 and give every task an estimate.</p>
             <Rule dotted />
+            {aiEnabled && today.length > 0 ? (
+              <SuggestTop
+                which="today"
+                titleOf={(id) => today.find((t) => t.id === id)?.title}
+                onApply={async (ids) => { for (let i = 0; i < ids.length; i++) await setTop(ids[i], i + 1); }}
+              />
+            ) : null}
             {today.length === 0 ? (
               <p className="py-6 text-[16px] text-muted">Nothing planned. Go back and pull something in.</p>
             ) : (

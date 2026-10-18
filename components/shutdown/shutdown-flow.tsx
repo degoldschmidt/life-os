@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { HabitToggle } from "@/components/habits/habit-toggle";
 import { dropTask, planTomorrow, setTopTomorrow, somedayTask, toggleDone } from "@/app/actions/tasks";
 import { completeShutdown, saveShutdown } from "@/app/actions/shutdown";
+import { SuggestTop } from "@/components/ai/suggest-top";
 import { formatHoursMinutes } from "@/lib/dates";
 
 export type SweepTask = { id: string; title: string; areaCode: string | null; estimateMin: number | null; stale?: boolean };
@@ -31,6 +32,7 @@ export function ShutdownFlow({
   habits,
   candidates,
   dateLabel,
+  aiEnabled = false,
 }: {
   reviewId: string;
   initialStep: number;
@@ -39,6 +41,7 @@ export function ShutdownFlow({
   habits: ShutdownHabit[];
   candidates: TomorrowTask[];
   dateLabel: string;
+  aiEnabled?: boolean;
 }) {
   void _reviewId;
   const router = useRouter();
@@ -125,6 +128,13 @@ export function ShutdownFlow({
               <Label>{chosen.length}/3</Label>
             </div>
             <Rule dotted />
+            {aiEnabled ? (
+              <SuggestTop
+                which="tomorrow"
+                titleOf={(id) => candidates.find((c) => c.id === id)?.title}
+                onApply={async (ids) => { for (let i = 0; i < ids.length; i++) await setTopTomorrow(ids[i], i + 1); }}
+              />
+            ) : null}
             {chosen.length ? (
               <ol className="mb-4">
                 {chosen.map((t) => (

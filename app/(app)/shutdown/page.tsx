@@ -10,8 +10,9 @@ import { requireUser } from "@/lib/auth";
 import { addDaysToKey, dayKeyToDate, formatHoursMinutes, todayKey } from "@/lib/dates";
 import { getSettings } from "@/lib/services/settings";
 import { listHabitStatuses } from "@/lib/services/habits";
-import { listDay, listInbox, listStale } from "@/lib/services/tasks";
+import { listAnytime, listDay, listInbox, listStale } from "@/lib/services/tasks";
 import { getOrCreateDayReview, type DaySnapshot } from "@/lib/services/reviews";
+import { aiAvailable } from "@/lib/ai/run";
 
 export const metadata: Metadata = { title: "Daily shutdown" };
 
@@ -75,12 +76,13 @@ export default async function ShutdownPage() {
     );
   }
 
-  const [dayTasks, stale, habits, tomorrowTasks, inbox] = await Promise.all([
+  const [dayTasks, stale, habits, tomorrowTasks, inbox, anytime] = await Promise.all([
     listDay(user.id, today),
     listStale(user.id, today),
     listHabitStatuses(user.id, today),
     listDay(user.id, tomorrow),
     listInbox(user.id),
+    listAnytime(user.id),
   ]);
 
   const sweep = [
@@ -89,6 +91,7 @@ export default async function ShutdownPage() {
   ];
   const candidates = [
     ...tomorrowTasks.filter((t) => t.status === "todo"),
+    ...anytime,
     ...inbox,
   ].map((t) => ({
     id: t.id,
@@ -111,6 +114,7 @@ export default async function ShutdownPage() {
       habits={habitRows}
       candidates={candidates}
       dateLabel={label}
+      aiEnabled={aiAvailable()}
     />
   );
 }
