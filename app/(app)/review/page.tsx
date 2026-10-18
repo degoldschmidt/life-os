@@ -5,6 +5,7 @@ import { ThinNumber } from "@/components/ui/thin-number";
 import { Stepper } from "@/components/ui/stepper";
 import { OrangeDot } from "@/components/ui/dot";
 import { Placeholder } from "@/components/shell/placeholder";
+import { ButtonLink } from "@/components/ui/button";
 
 export const metadata: Metadata = { title: "Review" };
 
@@ -20,6 +21,9 @@ export default function ReviewPage() {
         <ThinNumber size={64} className="mt-3 text-[#7a7a7a]">01</ThinNumber>
         <Label className="mt-2 text-on-ink">Clear</Label>
         <Stepper steps={["Clear", "Look back", "Goals", "Reflect", "Look ahead", "Close"]} current={0} />
+        <div className="mt-6">
+          <ButtonLink href="/shutdown" className="!border-on-ink !text-on-ink">Daily shutdown</ButtonLink>
+        </div>
       </Tile>
       <Placeholder
         title="Review"

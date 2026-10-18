@@ -104,3 +104,11 @@ export async function setEstimate(taskId: string, minutes: number | null) {
   await tasks.updateTask(userId, id.parse(taskId), { estimateMin: z.number().int().min(1).max(1440).nullable().parse(minutes) });
   refresh();
 }
+
+/** Shutdown step 3: choose tomorrow's Top 3. */
+export async function setTopTomorrow(taskId: string, rank: number | null) {
+  const { userId, today, settings } = await ctx();
+  const tomorrow = addDaysToKey(today, 1, settings.tz);
+  await tasks.setTopRank(userId, id.parse(taskId), z.number().int().min(1).max(3).nullable().parse(rank), tomorrow);
+  refresh();
+}

@@ -252,3 +252,15 @@ export async function materializeRecurring(userId: string, day: DayKey): Promise
   }
   return created;
 }
+
+/**
+ * Everything that was planned for `day`, including tasks later deferred, dropped or
+ * finished. This is the denominator for planned-vs-done, so it must not shrink when the
+ * user sweeps unfinished work away during shutdown.
+ */
+export async function listPlannedFor(userId: string, day: DayKey): Promise<TaskWithArea[]> {
+  const rows = await select().where(
+    and(eq(tasks.userId, userId), notTemplate, or(eq(tasks.plannedForDate, day), and(eq(tasks.when, "scheduled"), eq(tasks.scheduledDate, day)))),
+  );
+  return flat(rows);
+}

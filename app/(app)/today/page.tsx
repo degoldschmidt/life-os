@@ -6,12 +6,16 @@ import { ThinNumber } from "@/components/ui/thin-number";
 import { OrangeDot } from "@/components/ui/dot";
 import { Meter } from "@/components/ui/meter";
 import { TaskRow } from "@/components/tasks/task-row";
+import { ButtonLink } from "@/components/ui/button";
 import { CaptureButtonInline } from "@/components/capture/capture-inline";
+import { HabitToggle } from "@/components/habits/habit-toggle";
+import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { dayKeyToDate, formatHoursMinutes, periodFor, todayKey } from "@/lib/dates";
 import { nextFreeRank, splitTop, summarizeDay } from "@/lib/planning";
 import { getSettings } from "@/lib/services/settings";
 import { listDay, listStale, materializeRecurring } from "@/lib/services/tasks";
+import { listHabitStatuses } from "@/lib/services/habits";
 
 export const metadata: Metadata = { title: "Today" };
 
@@ -23,7 +27,12 @@ export default async function TodayPage() {
   const week = periodFor("week", key, settings.tz);
 
   await materializeRecurring(user.id, key);
-  const [dayTasks, stale] = await Promise.all([listDay(user.id, key), listStale(user.id, key)]);
+  const [dayTasks, stale, habits] = await Promise.all([
+    listDay(user.id, key),
+    listStale(user.id, key),
+    listHabitStatuses(user.id, key),
+  ]);
+  const dueHabits = habits.filter((h) => h.status.dueToday || h.status.doneToday);
 
   const { top, rest } = splitTop(dayTasks.filter((t) => t.status === "todo"));
   const doneTasks = dayTasks.filter((t) => t.status === "done");
@@ -45,9 +54,12 @@ export default async function TodayPage() {
         <p className="mt-2 text-[16px] leading-[1.35]">
           {focus ? focus.title : <span className="text-muted">Pick a Top 3 task to set today&apos;s focus.</span>}
         </p>
-        <div className="mt-auto flex justify-between pt-6">
-          <Mono className="text-muted">{s.open} OPEN</Mono>
-          <Mono className="text-muted">SHUTDOWN {settings.shutdownTime}</Mono>
+        <div className="mt-auto pt-6">
+          <ButtonLink href="/shutdown" className="!border-on-ink !text-on-ink">Start shutdown</ButtonLink>
+          <div className="mt-4 flex justify-between">
+            <Mono className="text-muted">{s.open} OPEN</Mono>
+            <Mono className="text-muted">SHUTDOWN {settings.shutdownTime}</Mono>
+          </div>
         </div>
       </Tile>
 
@@ -83,6 +95,36 @@ export default async function TodayPage() {
             <CaptureButtonInline />
           </div>
         </Tile>
+
+        {habits.length ? (
+          <Tile>
+            <div className="flex justify-between">
+              <Label>Habits</Label>
+              <Link href="/habits" className="label text-muted hover:text-text">
+                {dueHabits.filter((h) => h.status.doneToday).length}/{dueHabits.length}
+              </Link>
+            </div>
+            <Rule dotted />
+            {dueHabits.length === 0 ? (
+              <p className="py-2 text-[14px] text-muted">Nothing due today.</p>
+            ) : (
+              <ul className="flex flex-wrap gap-x-6 gap-y-3">
+                {dueHabits.map((h) => (
+                  <li key={h.id} className="flex items-center gap-3 text-[14px]">
+                    <HabitToggle
+                      habitId={h.id}
+                      name={h.name}
+                      done={h.status.doneToday}
+                      nudge={h.status.missedLastDue && !h.status.doneToday}
+                      size={22}
+                    />
+                    <span className={h.status.doneToday ? "text-muted" : ""}>{h.name}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Tile>
+        ) : null}
 
         {doneTasks.length ? (
           <Tile>
