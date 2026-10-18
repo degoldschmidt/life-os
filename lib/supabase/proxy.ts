@@ -2,8 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isAllowedEmail, isSupabaseConfigured, supabasePublicEnv } from "@/lib/env";
 
-// /api/cron authenticates with its own bearer secret (see lib/jobs).
-const PUBLIC_PATHS = ["/login", "/auth", "/offline", "/manifest.webmanifest", "/sw.js", "/icons", "/api/cron"];
+// /api/cron and /api/mcp authenticate with their own bearer secrets (see lib/jobs, lib/mcp).
+const PUBLIC_PATHS = ["/login", "/auth", "/offline", "/manifest.webmanifest", "/sw.js", "/icons", "/api/cron", "/api/mcp"];
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/")) || pathname.startsWith("/_next");

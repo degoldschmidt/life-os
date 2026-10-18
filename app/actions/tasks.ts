@@ -4,9 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { addDaysToKey, todayKey } from "@/lib/dates";
-import { parseCapture } from "@/lib/capture/parse";
 import { getSettings } from "@/lib/services/settings";
-import { areaIdByCode, listAreas } from "@/lib/services/areas";
+import { captureForUser } from "@/lib/services/capture";
 import * as tasks from "@/lib/services/tasks";
 
 const id = z.uuid();
@@ -25,29 +24,10 @@ export type CaptureResult = { ok: true; title: string; where: string } | { ok: f
 export async function captureTask(raw: string, opts: { forceToday?: boolean } = {}): Promise<CaptureResult> {
   const input = z.string().trim().min(1).max(500).safeParse(raw);
   if (!input.success) return { ok: false, error: "Type something to capture." };
-  const { userId, settings, today } = await ctx();
-
-  const areas = await listAreas(userId);
-  const parsed = parseCapture(input.data, { tz: settings.tz, areaCodes: areas.map((a) => a.code) });
-  const areaId = parsed.areaCode ? await areaIdByCode(userId, parsed.areaCode) : null;
-
-  const plan =
-    opts.forceToday || parsed.today
-      ? ({ kind: "today", day: today } as const)
-      : parsed.date
-        ? ({ kind: "date", day: parsed.date } as const)
-        : ({ kind: "inbox" } as const);
-
-  await tasks.createTask(userId, {
-    title: parsed.title,
-    areaId,
-    estimateMin: parsed.estimateMin,
-    deadline: parsed.deadline,
-    plan,
-  });
-  refresh();
-  const where = plan.kind === "today" ? "Today" : plan.kind === "date" ? plan.day : "Inbox";
-  return { ok: true, title: parsed.title, where };
+  const { userId, settings } = await ctx();
+  const r = await captureForUser(userId, settings, input.data, opts);
+  if (r.ok) refresh();
+  return r.ok ? { ok: true, title: r.title, where: r.where } : r;
 }
 
 export async function toggleDone(taskId: string, done: boolean) {
