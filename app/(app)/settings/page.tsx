@@ -98,6 +98,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
           <p className="text-[14px] text-muted">Everything you enter is yours. Download it any time.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <a href="/api/export/json" className="inline-flex rounded-full border-[1.2px] border-text px-[18px] py-[9px] font-mono text-[12px] uppercase tracking-[0.04em]">Export JSON</a>
+            <a href="/setup" className="inline-flex rounded-full border border-line px-[18px] py-[9px] font-mono text-[12px] uppercase tracking-[0.04em] text-muted">Setup</a>
             <a href="/import" className="inline-flex rounded-full border border-line px-[18px] py-[9px] font-mono text-[12px] uppercase tracking-[0.04em] text-muted">Import</a>
             <a href="/api/export/markdown" className="inline-flex rounded-full border-[1.2px] border-text px-[18px] py-[9px] font-mono text-[12px] uppercase tracking-[0.04em]">Export Markdown vault</a>
           </div>

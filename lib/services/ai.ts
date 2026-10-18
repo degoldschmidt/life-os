@@ -124,7 +124,18 @@ export async function analyzeDump(userId: string, settings: Settings, text: stri
     schema: DumpSchema,
     effort: "medium",
     maxTokens: 8000,
-    stub: () => ({ ...fallback(), projects: [], goals: [], habits: [] }),
+    // Dev stub: lines starting with goal:, habit: or project: are sorted accordingly; the rest are tasks.
+    stub: () => {
+      const strip = (l: string, p: string) => l.slice(p.length).trim();
+      const tasks = fallback();
+      const keep = lines.filter((l) => !/^(goal|habit|project):/i.test(l));
+      return {
+        tasks: cleanDump({ ...tasks, tasks: tasks.tasks.filter((t) => keep.some((k) => k.startsWith(t.title.slice(0, 5)))) }, codes).tasks.map((t) => ({ ...t, project: /figure/i.test(t.title) ? "Revise figure 2" : null })),
+        projects: lines.filter((l) => /^project:/i.test(l)).map((l) => ({ title: strip(l, "project:"), area: "WRK" })),
+        goals: lines.filter((l) => /^goal:/i.test(l)).map((l) => ({ title: strip(l, "goal:"), area: "HLT", horizon: "quarter" as const, keyResults: ["Time | 50 | min"] })),
+        habits: lines.filter((l) => /^habit:/i.test(l)).map((l) => ({ name: strip(l, "habit:"), area: "HLT", rhythm: "daily" as const })),
+      };
+    },
   });
   if (!res.ok) return res;
   return { ok: true, data: cleanDump(res.data, codes), costUsd: res.costUsd, mode: "claude" };

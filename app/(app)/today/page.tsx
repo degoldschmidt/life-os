@@ -21,6 +21,7 @@ import { DayRail } from "@/components/today/day-rail";
 import { listBlocks } from "@/lib/services/blocks";
 import { listCalendarEvents } from "@/lib/services/calendar";
 import { connectionStatus } from "@/lib/services/gcal";
+import { isEmptyStart, setupProgress } from "@/lib/services/setup";
 import { instantToMinutes } from "@/lib/blocks";
 
 export const metadata: Metadata = { title: "Today" };
@@ -33,7 +34,7 @@ export default async function TodayPage() {
   const week = periodFor("week", key, settings.tz);
 
   await materializeRecurring(user.id, key);
-  const [dayTasks, stale, habits, intention, events, blocks, gcal] = await Promise.all([
+  const [dayTasks, stale, habits, intention, events, blocks, gcal, progress] = await Promise.all([
     listDay(user.id, key),
     listStale(user.id, key),
     listHabitStatuses(user.id, key),
@@ -41,6 +42,7 @@ export default async function TodayPage() {
     listCalendarEvents(user.id, key, key, settings.tz),
     listBlocks(user.id, key, key, settings.tz),
     connectionStatus(user.id).catch(() => ({ connected: false, lastSyncedAt: null, events: 0 })),
+    setupProgress(user.id),
   ]);
   const nowMin = instantToMinutes(new Date(), settings.tz);
   const dueHabits = habits.filter((h) => h.status.dueToday || h.status.doneToday);
@@ -85,6 +87,13 @@ export default async function TodayPage() {
       </Tile>
 
       <div className="flex flex-col gap-[14px]">
+        {isEmptyStart(progress) ? (
+          <Tile dark>
+            <Label>Start here</Label>
+            <p className="mt-3 max-w-[460px] text-[18px] leading-[1.3]">Life OS is empty. Ten minutes of setup puts your areas, goals, habits and open tasks in place.</p>
+            <div className="mt-4"><ButtonLink href="/setup" className="!border-on-ink !text-on-ink">Set up Life OS →</ButtonLink></div>
+          </Tile>
+        ) : null}
         <Tile>
           <div className="flex justify-between">
             <Label>Top 3</Label>

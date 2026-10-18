@@ -3,10 +3,15 @@ import { Tile } from "@/components/ui/tile";
 import { Label, Mono, Rule } from "@/components/ui/label";
 import { NotionImport } from "@/components/import/notion-import";
 import { FileImport } from "@/components/import/file-import";
+import { DumpImport } from "@/components/import/dump-import";
+import { requireUser } from "@/lib/auth";
+import { listAreas } from "@/lib/services/areas";
 
 export const metadata: Metadata = { title: "Import" };
 
-export default function ImportPage() {
+export default async function ImportPage() {
+  const user = await requireUser();
+  const codes = (await listAreas(user.id)).map((a) => a.code);
   return (
     <div className="flex flex-col gap-[14px]">
       <Tile dark className="!py-4">
@@ -14,6 +19,12 @@ export default function ImportPage() {
           <Label>Import</Label>
           <Mono className="text-muted">BRING WHAT YOU ALREADY HAVE</Mono>
         </div>
+      </Tile>
+
+      <Tile>
+        <Label>Paste anything</Label>
+        <Rule dotted />
+        <DumpImport areaCodes={codes} />
       </Tile>
 
       <div className="grid gap-[14px] lg:grid-cols-2">
