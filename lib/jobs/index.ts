@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { createClient } from "@supabase/supabase-js";
 import { exportData } from "@/lib/services/export";
 import { ownerUserId } from "@/lib/services/owner";
+import { connectionStatus, isGoogleConfigured, syncGoogleCalendar } from "@/lib/services/gcal";
+import { getSettingsFor } from "@/lib/services/settings";
 
 export type JobResult = { ok: boolean; detail?: Record<string, unknown> };
 export type Job = { name: string; description: string; run: () => Promise<JobResult> };
@@ -69,7 +71,13 @@ export const JOBS: Record<string, Job> = {
     name: "calendar-sync",
     description: "Incremental Google Calendar sync (phase 4).",
     async run() {
-      return { ok: true, detail: { skipped: "arrives in phase 4" } };
+      if (!isGoogleConfigured()) return { ok: true, detail: { skipped: "Google is not configured" } };
+      const userId = await ownerUserId();
+      if (!userId) return { ok: false, detail: { error: "owner user not found" } };
+      const status = await connectionStatus(userId);
+      if (!status.connected) return { ok: true, detail: { skipped: "not connected" } };
+      const settings = await getSettingsFor(userId);
+      return { ok: true, detail: { ...(await syncGoogleCalendar(userId, settings.tz)) } };
     },
   },
   reminders: {

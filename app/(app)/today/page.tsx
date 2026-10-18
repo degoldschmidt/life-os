@@ -17,6 +17,11 @@ import { getSettings } from "@/lib/services/settings";
 import { listDay, listStale, materializeRecurring } from "@/lib/services/tasks";
 import { listHabitStatuses } from "@/lib/services/habits";
 import { getMorningIntention } from "@/lib/services/journal";
+import { DayRail } from "@/components/today/day-rail";
+import { listBlocks } from "@/lib/services/blocks";
+import { listCalendarEvents } from "@/lib/services/calendar";
+import { connectionStatus } from "@/lib/services/gcal";
+import { instantToMinutes } from "@/lib/blocks";
 
 export const metadata: Metadata = { title: "Today" };
 
@@ -28,12 +33,16 @@ export default async function TodayPage() {
   const week = periodFor("week", key, settings.tz);
 
   await materializeRecurring(user.id, key);
-  const [dayTasks, stale, habits, intention] = await Promise.all([
+  const [dayTasks, stale, habits, intention, events, blocks, gcal] = await Promise.all([
     listDay(user.id, key),
     listStale(user.id, key),
     listHabitStatuses(user.id, key),
     getMorningIntention(user.id, key),
+    listCalendarEvents(user.id, key, key, settings.tz),
+    listBlocks(user.id, key, key, settings.tz),
+    connectionStatus(user.id).catch(() => ({ connected: false, lastSyncedAt: null, events: 0 })),
   ]);
+  const nowMin = instantToMinutes(new Date(), settings.tz);
   const dueHabits = habits.filter((h) => h.status.dueToday || h.status.doneToday);
 
   const { top, rest } = splitTop(dayTasks.filter((t) => t.status === "todo"));
@@ -167,17 +176,7 @@ export default async function TodayPage() {
       </div>
 
       <Tile className="hidden xl:block xl:row-span-2">
-        <div className="flex justify-between">
-          <Label>Calendar</Label>
-          <Label>Google · phase 4</Label>
-        </div>
-        <div className="relative mt-3 h-[420px]">
-          {["09", "10", "11", "12", "14", "15"].map((h, i) => (
-            <div key={h} className="hairline absolute inset-x-0 pt-[3px]" style={{ top: i * 70 }}>
-              <Mono className="text-muted">{h}</Mono>
-            </div>
-          ))}
-        </div>
+        <DayRail events={events} blocks={blocks} nowMin={nowMin} connected={gcal.connected} />
       </Tile>
 
       <nav aria-label="More" className="flex flex-wrap gap-x-5 gap-y-2 md:col-start-2 xl:col-start-2">

@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth";
 import { getSettings } from "@/lib/services/settings";
 import { updateSettings } from "@/app/actions/settings";
+import { disconnect, syncNow } from "@/app/actions/google";
+import { connectionStatus, isGoogleConfigured } from "@/lib/services/gcal";
+import { formatDistanceToNow } from "date-fns";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -25,6 +28,10 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
   const user = await requireUser();
   const settings = await getSettings();
   const env = (k: string) => Boolean(process.env[k]);
+  const gcal = await connectionStatus(user.id).catch(() => ({ connected: false, lastSyncedAt: null as Date | null, events: 0 }));
+  const gconf = isGoogleConfigured();
+  const GOOGLE_MSG: Record<string, string> = { connected: "Connected. Events are syncing.", synced: "Synced.", disconnected: "Disconnected and cached events removed.", denied: "Access was not granted.", failed: "Couldn't finish connecting. Check the Google setup in docs/SETUP.md.", "state-mismatch": "The sign-in request didn't match. Try again.", "sync-failed": "Sync failed. Try again in a minute.", reconnect: "Google access expired. Connect again.", "not-configured": "Google isn't configured yet." };
+  const gmsg = typeof sp.google === "string" ? GOOGLE_MSG[sp.google] : undefined;
 
   return (
     <div className="grid gap-[14px] lg:grid-cols-2">
@@ -86,7 +93,24 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
         <Tile>
           <Label>Connections</Label>
           <Rule dotted />
-          <Status ok={env("GOOGLE_CLIENT_ID") && env("GOOGLE_CLIENT_SECRET")} label="Google Calendar" hint="Read-only overlay on Week and Today" />
+          <div className="leader py-3 text-[14px]">
+            <div className="flex items-center justify-between gap-3">
+              <span>Google Calendar<span className="mt-[2px] block text-[12px] text-muted">Read-only overlay on Week and Today</span></span>
+              <Mono className={gcal.connected ? "text-text" : "text-muted"}>{gcal.connected ? "CONNECTED" : gconf ? "READY" : "NOT SET"}</Mono>
+            </div>
+            {gcal.connected ? (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Mono className="mr-2 text-muted">{gcal.events} EVENTS · {gcal.lastSyncedAt ? `SYNCED ${formatDistanceToNow(gcal.lastSyncedAt).toUpperCase()} AGO` : "NOT SYNCED YET"}</Mono>
+                <form action={syncNow}><Button type="submit" variant="quiet">Sync now</Button></form>
+                <form action={disconnect}><Button type="submit" variant="quiet">Disconnect</Button></form>
+              </div>
+            ) : gconf ? (
+              <div className="mt-3"><a href="/api/google/start" className="inline-flex rounded-full border-[1.2px] border-text px-[18px] py-[9px] font-mono text-[12px] uppercase tracking-[0.04em]">Connect Google Calendar</a></div>
+            ) : (
+              <p className="mt-2 text-[12px] text-muted">Add GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and TOKEN_ENCRYPTION_KEY, then redeploy. Steps are in docs/SETUP.md.</p>
+            )}
+            {gmsg ? <p className="mt-2 text-[13px] text-orange">{gmsg}</p> : null}
+          </div>
           <Status ok={env("ANTHROPIC_API_KEY")} label="Claude assistant" hint="Review drafts, top-3 proposals, brain dump" />
           <Status ok={env("NOTION_TOKEN")} label="Notion import" />
           <Status ok={env("MCP_TOKEN")} label="Claude Code (MCP)" hint="Lets Claude Code read and write your Life OS" />

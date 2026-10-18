@@ -43,3 +43,11 @@ export async function saveSettings(userId: string, patch: SettingsPatch): Promis
     .values({ userId, ...clean })
     .onConflictDoUpdate({ target: schema.settings.userId, set: { ...clean, updatedAt: new Date() } });
 }
+
+/** Settings for a specific user, for background jobs that have no session. */
+export async function getSettingsFor(userId: string): Promise<Settings> {
+  const [row] = await db().select().from(schema.settings).where(eq(schema.settings.userId, userId)).limit(1);
+  if (!row) return DEFAULTS;
+  const { tz, dayStartHour, shutdownTime, dailyCapacityMin, aiModel } = row;
+  return { tz, dayStartHour, shutdownTime, dailyCapacityMin, aiModel };
+}
